@@ -1,93 +1,112 @@
-# Credit Memo
+Credit Memo RAG Application 📄🤖
 
+    A Retrieval-Augmented Generation (RAG) pipeline designed to streamline credit memo creation by extracting and processing financial data from PDF documents.
 
+This application automates the process of parsing financial PDFs, chunking the extracted content, storing it as embeddings in a vector database (ChromaDB), and using a Large Language Model (LLM) to generate structured credit memo outputs.
 
-## Getting started
+🚀 Key Features
 
-To make it easy for you to get started with GitLab, here's a list of recommended next steps.
+    PDF Data Extraction: Converts unstructured financial data from PDF files into clean Markdown.
 
-Already a pro? Just edit this README.md and make it your own. Want to make it easy? [Use the template at the bottom](#editing-this-readme)!
+    Intelligent Chunking: Splits the extracted text into semantically meaningful chunks.
 
-## Add your files
+    Vector Embeddings: Creates and stores vector representations of text chunks in a persistent ChromaDB database.
 
-- [ ] [Create](https://docs.gitlab.com/ee/user/project/repository/web_editor.html#create-a-file) or [upload](https://docs.gitlab.com/ee/user/project/repository/web_editor.html#upload-a-file) files
-- [ ] [Add files using the command line](https://docs.gitlab.com/topics/git/add_files/#add-files-to-a-git-repository) or push an existing Git repository with the following command:
+    RAG Pipeline: Retrieves relevant context from the vector DB to answer specific queries or generate full reports.
 
-```
-cd existing_repo
-git remote add origin https://gitlab.arya.ai/data-science/credit-memo.git
-git branch -M main
-git push -uf origin main
-```
+    FastAPI Service: Exposes the RAG pipeline via a simple and efficient REST API.
 
-## Integrate with your tools
+⚙️ Project Structure
 
-- [ ] [Set up project integrations](https://gitlab.arya.ai/data-science/credit-memo/-/settings/integrations)
+Here's a breakdown of the key files and directories in this project:
 
-## Collaborate with your team
+.
+├── app.py                  # FastAPI application entrypoint
+├── docker-compose.yml      # Docker Compose configuration
+├── Dockerfile              # Dockerfile for building the application image
+├── run.sh                  # Convenience script to start the API
+├── requirements.txt        # Python dependencies
+├── resources/              # Core application logic and resources
+│   ├── chunker.py          # Handles text chunking and embedding generation
+│   ├── extractor.py        # Extracts text from PDFs and converts to Markdown
+│   ├── pipeline.py         # Orchestrates the end-to-end RAG workflow
+│   ├── rag.py              # Core RAG implementation (retrieval + generation)
+│   └── prompts/            # Contains prompt templates for the LLM
+├── outputs/                # Default directory for extracted markdown and generated memos
+└── chroma_db/              # Persistent storage for the Chroma vector database
 
-- [ ] [Invite team members and collaborators](https://docs.gitlab.com/ee/user/project/members/)
-- [ ] [Create a new merge request](https://docs.gitlab.com/ee/user/project/merge_requests/creating_merge_requests.html)
-- [ ] [Automatically close issues from merge requests](https://docs.gitlab.com/ee/user/project/issues/managing_issues.html#closing-issues-automatically)
-- [ ] [Enable merge request approvals](https://docs.gitlab.com/ee/user/project/merge_requests/approvals/)
-- [ ] [Set auto-merge](https://docs.gitlab.com/user/project/merge_requests/auto_merge/)
+📋 Getting Started
 
-## Test and Deploy
+Follow these steps to set up and run the project locally.
 
-Use the built-in continuous integration in GitLab.
+1. Prerequisites
 
-- [ ] [Get started with GitLab CI/CD](https://docs.gitlab.com/ee/ci/quick_start/)
-- [ ] [Analyze your code for known vulnerabilities with Static Application Security Testing (SAST)](https://docs.gitlab.com/ee/user/application_security/sast/)
-- [ ] [Deploy to Kubernetes, Amazon EC2, or Amazon ECS using Auto Deploy](https://docs.gitlab.com/ee/topics/autodevops/requirements.html)
-- [ ] [Use pull-based deployments for improved Kubernetes management](https://docs.gitlab.com/ee/user/clusters/agent/)
-- [ ] [Set up protected environments](https://docs.gitlab.com/ee/ci/environments/protected_environments.html)
+    Python 3.9+
 
-***
+    Docker and Docker Compose (for containerized deployment)
 
-# Editing this README
+2. Installation
 
-When you're ready to make this README your own, just edit this file and use the handy template below (or feel free to structure it however you want - this is just a starting point!). Thanks to [makeareadme.com](https://www.makeareadme.com/) for this template.
+Clone the repository and install the required Python dependencies.
+Bash
 
-## Suggestions for a good README
+# Create and activate a virtual environment
+python -m venv .venv
+source .venv/bin/activate
 
-Every project is different, so consider which of these sections apply to yours. The sections used in the template are suggestions for most open source projects. Also keep in mind that while a README can be too long and detailed, too long is better than too short. If you think your README is too long, consider utilizing another form of documentation rather than cutting out information.
+# Install dependencies
+pip install -r requirements.txt
 
-## Name
-Choose a self-explaining name for your project.
+🛠️ Usage
 
-## Description
-Let people know what your project can do specifically. Provide context and add a link to any reference visitors might be unfamiliar with. A list of Features or a Background subsection can also be added here. If there are alternatives to your project, this is a good place to list differentiating factors.
+You can interact with the application either through the command line for direct processing or by running the FastAPI service.
 
-## Badges
-On some READMEs, you may see small images that convey metadata, such as whether or not all the tests are passing for the project. You can use Shields to add some to your README. Many services also have instructions for adding a badge.
+Method 1: Command-Line Interface
 
-## Visuals
-Depending on what you are making, it can be a good idea to include screenshots or even a video (you'll frequently see GIFs rather than actual videos). Tools like ttygif can help, but check out Asciinema for a more sophisticated method.
+1. Extract Content from a PDF
 
-## Installation
-Within a particular ecosystem, there may be a common way of installing things, such as using Yarn, NuGet, or Homebrew. However, consider the possibility that whoever is reading your README is a novice and would like more guidance. Listing specific steps helps remove ambiguity and gets people to using your project as quickly as possible. If it only runs in a specific context like a particular programming language version or operating system or has dependencies that have to be installed manually, also add a Requirements subsection.
+First, convert your target PDF into a Markdown file. This will be used as the source for the RAG pipeline.
+Bash
 
-## Usage
-Use examples liberally, and show the expected output if you can. It's helpful to have inline the smallest example of usage that you can demonstrate, while providing links to more sophisticated examples if they are too long to reasonably include in the README.
+python -m resources.extractor --pdf path/to/your/document.pdf
 
-## Support
-Tell people where they can go to for help. It can be any combination of an issue tracker, a chat room, an email address, etc.
+This command will save the extracted text to outputs/document.md.
 
-## Roadmap
-If you have ideas for releases in the future, it is a good idea to list them in the README.
+2. Run the RAG Pipeline from Markdown
 
-## Contributing
-State if you are open to contributions and what your requirements are for accepting them.
+Once you have the Markdown file, you can either generate a full credit memo or ask a specific question.
 
-For people who want to make changes to your project, it's helpful to have some documentation on how to get started. Perhaps there is a script that they should run or some environment variables that they need to set. Make these steps explicit. These instructions could also be useful to your future self.
+    To generate a full credit memo:
+    Bash
 
-You can also document commands to lint the code or run tests. These steps help to ensure high code quality and reduce the likelihood that the changes inadvertently break something. Having instructions for running tests is especially helpful if it requires external setup, such as starting a Selenium server for testing in a browser.
+python -m resources.markdown_pipeline --md outputs/document.md --n_results 5
 
-## Authors and acknowledgment
-Show your appreciation to those who have contributed to the project.
+To query for a specific piece of information:
+Bash
 
-## License
-For open source projects, say how it is licensed.
+    python -m resources.markdown_pipeline --md outputs/document.md --query "What is the total assets?" --n_results 5
 
-## Project status
-If you have run out of energy or time for your project, put a note at the top of the README saying that development has slowed down or stopped completely. Someone may choose to fork your project or volunteer to step in as a maintainer or owner, allowing your project to keep going. You can also make an explicit request for maintainers.
+Method 2: FastAPI Service
+
+1. Start the API Server
+
+Use the provided shell script to launch the FastAPI application with Uvicorn.
+Bash
+
+./run.sh
+
+The server will be running at http://localhost:9999.
+
+2. Access the API Docs
+
+Navigate to http://localhost:9999/docs in your browser to access the interactive Swagger UI documentation, where you can test the API endpoints directly.
+
+Method 3: Docker Deployment 🐳
+
+For a containerized setup, you can use the provided Docker files.
+Bash
+
+# Build and run the service using Docker Compose
+docker-compose up --build
+
+The service will be available at http://localhost:9999.

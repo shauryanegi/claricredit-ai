@@ -1,0 +1,12 @@
+services:
+  credit-memo:
+    image: credit-memo:latest
+    container_name: credit-memo
+    restart: always
+    command: ["bash", "/scripts/run.sh"]
+    volumes:
+      - ./:/app
+      - ./chroma_db:/app/chroma_db
+      - ./outputs:/app/outputs
+      - ./run.sh:/scripts/run.sh
+    network_mode: host

@@ -1,0 +1,39 @@
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.egg-info/
+
+# Virtual environments
+.venv/
+venv/
+.env
+.envrc
+
+# Git
+.git
+.gitignore
+
+# OS junk
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Jupyter notebooks
+*.ipynb
+
+# Local outputs & cache (don’t copy into image)
+outputs/
+chroma_db/
+
+# IDE/project files
+.vscode/
+.idea/
+
+# Docker & compose files themselves (not needed in image)
+docker-compose.yml
+Dockerfile
+run.sh

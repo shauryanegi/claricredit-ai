@@ -1,0 +1,32 @@
+# Python cache & virtual env
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.egg-info/
+.venv/
+.env
+venv/
+.envrc
+
+# OS junk
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Jupyter notebooks
+*.ipynb
+
+# Outputs (generated, not source)
+outputs/
+chroma_db/
+
+# IDE/project files
+.vscode/
+.idea/
+
+# Docker
+*.pid
+*.sock

@@ -1,0 +1,18 @@
+executive_summary: |
+  [SECTION] Executive Summary
+  Prepare an executive summary of {company_name}'s credit profile for {year}.
+
+financial_highlights: |
+  [SECTION] Financial Highlights
+  Summarize revenue, profit, total assets, and liabilities for {company_name} in {year}.
+  Ensure the figures match retrieved context exactly.
+
+risk_analysis: |
+  [SECTION] Risk Analysis
+  Identify major risks faced by {company_name} as of {year}.
+  Use chain-of-thought reasoning internally, but output only clear analyst commentary.
+
+recommendation: |
+  [SECTION] Recommendation
+  Provide a credit recommendation for {company_name} in {year} (Approve / Reject / Defer).
+  Base entirely on the retrieved financials and context.

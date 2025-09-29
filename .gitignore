@@ -24,7 +24,7 @@ outputs/
 chroma_db/
 
 # Config (local/server only, don’t push to Git)
-config/config.py
+resources/config/config.py
 
 # IDE/project files
 .vscode/

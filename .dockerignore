@@ -30,7 +30,7 @@ outputs/
 chroma_db/
 
 # Config (exclude secrets from image)
-config/config.py
+resources/config/config.py
 
 # IDE/project files
 .vscode/

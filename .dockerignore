@@ -25,15 +25,18 @@ Thumbs.db
 # Jupyter notebooks
 *.ipynb
 
-# Local outputs & cache (don’t copy into image)
+# Outputs & local DB (not needed inside Docker)
 outputs/
 chroma_db/
+
+# Config (exclude secrets from image)
+config/config.py
 
 # IDE/project files
 .vscode/
 .idea/
 
-# Docker & compose files themselves (not needed in image)
+# Docker-related files (not needed inside image)
 docker-compose.yml
 Dockerfile
 run.sh

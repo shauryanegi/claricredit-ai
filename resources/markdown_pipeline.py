@@ -5,6 +5,7 @@ from datetime import datetime
 from resources.config import config
 from resources import chunker
 from resources.rag import RAGPipelineCosine
+from resources.retrieval_queries.sections import CREDIT_MEMO_SECTIONS
 
 def load_prompts(file_path: str) -> dict:
     """Load YAML prompts as a dictionary of {section: prompt_text}."""
@@ -36,15 +37,14 @@ def run_pipeline(md_file: str, n_results: int = 5, query: str = None):
         results["single_query"] = {"question": query, "answer": answer}
         print(f"\n=== ANSWER ===\n{answer}")
     else:
-        # Load YAML prompts
-        prompts_file = os.path.join("resources", "prompts", "credit_memo_prompts.yaml")
-        prompts = load_prompts(prompts_file)
-
-        for section, prompt in prompts.items():
-            print(f"\n[INFO] Running section: {section}")
-            answer = rag.run(prompt, n_results=n_results)
-            results[section] = {"question": prompt, "answer": answer}
-            print(f"\n=== {section.upper()} ===\n{answer}")
+        for section, groups in CREDIT_MEMO_SECTIONS.items():
+            print(f"Making section:{section}")
+            section_results = []
+            for group in groups:
+                answer = rag.run(group)
+                section_results.append(answer)
+            section_text="\n\n".join(section_results)
+            results[section] = section_text
 
     # Step 3: Save results with timestamp
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
@@ -56,10 +56,9 @@ def run_pipeline(md_file: str, n_results: int = 5, query: str = None):
     output_path = os.path.join(config.OUTPUT_DIR, filename)
 
     with open(output_path, "w", encoding="utf-8") as f:
-        for section, qa in results.items():
+        for section, ans in results.items():
             f.write(f"## {section.replace('_', ' ').title()}\n\n")
-            f.write(f"**Question:**\n{qa['question']}\n\n")
-            f.write(f"**Answer:**\n{qa['answer']}\n\n")
+            f.write(f"\n{ans}\n\n")
 
     print(f"\n[INFO] Results saved to {output_path}")
 

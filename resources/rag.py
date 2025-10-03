@@ -29,10 +29,25 @@ class RAGPipelineCosine:
         ]
         return self.llm.chat(messages, max_tokens=512)
 
-    def run(self, query: str, n_results: int = 3) -> str:
-        docs_with_meta = self.retrieve(query, n_results=n_results)
-        docs = [doc for doc, meta in docs_with_meta]
-        print("\n=== Retrieved Docs Preview ===")
-        for d in docs:
-            print(d[:300].replace("\n", " ") + " ...")
-        return self.generate_answer(query, docs)
+    def run(self, group) -> str:
+        user_query=group["user_query"]
+        semantic_queries=group["semantic_queries"]
+        all_docs=[]
+        seen = set()
+        for dictionary in semantic_queries:
+            query=dictionary["query"]
+            n_results=dictionary["k"]
+            docs_with_meta = self.retrieve(query, n_results=n_results)
+            for doc, meta in docs_with_meta:
+                # print(meta) 
+                key=(meta['page'],meta['length'])
+                if key not in seen:   # deduplicate based on page
+                    seen.add(key)
+                    all_docs.append(doc)  
+                else:
+                    print(f"{key} repeated")
+
+        # print("\n=== Retrieved Docs Preview ===")
+        # for d in all_docs:
+        #     print(d[:300].replace("\n", " ") + " ...")
+        return self.generate_answer(user_query, all_docs)

@@ -24,8 +24,9 @@ CREDIT_MEMO_SECTIONS = {
             "user_query": 
             """Generate the 'Ownership' section of the credit memo. 
             It should include the 
-            - the no. of shares/ percentwise shares of directors if available
+            - the no. of shares or percentwise shares of the directors if available
             - any information about shareholders
+            - any other important information
             Especialy include any CORRECT numerical information about shares if present).
             Be elaborate. Include as many facts as you can from the provided context.
             Do not include anything that is not present in the context""",

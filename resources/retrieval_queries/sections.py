@@ -9,15 +9,17 @@ CREDIT_MEMO_SECTIONS = {
             "user_query": 
             """Generate the 'Borrower, Management' section of the credit memo. 
             It should include the 
-            - Company history
-            - the names of directors 
-            - overview of the industry
+            - Company background
+            - The names of directors 
+            - Overview of the industry
+            - Relationship with the bank (e.g., prior loans, payment history).
             Be elaborate. Include as many facts as you can from the provided context.
             Do not include anything that is not present in the context""",
 
             "semantic_queries": [
                 {"query": "Provide a summary of the company, including its history, core business operations, and what products or services it offers.", "k": 3},
                 {"query": "Describe the company's management team and board of directors, including the organizational structure.", "k": 3},
+                {"query": "Company's relationship history with the bank","k":3,"filter":"loan"}
             ]
             },
             {

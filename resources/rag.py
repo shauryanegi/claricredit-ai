@@ -12,12 +12,19 @@ class RAGPipelineCosine:
         self.collection = self.chroma_client.get_or_create_collection(collection_name)
         self.llm = LocalLLMAdapter(endpoint=llm_endpoint, model=llm_model)
 
-    def retrieve(self, query: str, n_results: int = 5):
+    def retrieve(self, query: str, n_results: int = 5, filter=None):
         query_emb = get_embedding(query)
-        results = self.collection.query(
-            query_embeddings=[query_emb],
-            n_results=n_results
-        )
+        if filter:
+            results = self.collection.query(
+                query_embeddings=[query_emb],
+                n_results=n_results,
+                where={"type": filter}
+            )
+        else:
+            results = self.collection.query(
+                query_embeddings=[query_emb],
+                n_results=n_results
+            )            
         docs = results["documents"][0]
         metas = results["metadatas"][0]
         return list(zip(docs, metas))
@@ -38,13 +45,18 @@ class RAGPipelineCosine:
         for dictionary in semantic_queries:
             query=dictionary["query"]
             n_results=dictionary["k"]
-            docs_with_meta = self.retrieve(query, n_results=n_results)
+            filter=dictionary.get("filter")
+            docs_with_meta = self.retrieve(query, n_results=n_results,filter=filter)
             for doc, meta in docs_with_meta:
                 # print(meta) 
                 # key=(meta['page'],meta['length'])
                 page=meta['page']
                 print(page)
-                if page not in seen:   # deduplicate based on page
+                if meta["type"]=="loan":
+                    all_docs.append(doc)
+                    print("doc=",doc)
+                
+                elif page not in seen:   # deduplicate based on page
                     seen.add(page)
                     # all_docs.append(doc)  
                     with open(split_page_file, "r", encoding="utf-8") as f:

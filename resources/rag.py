@@ -3,6 +3,7 @@ from typing import List
 from resources.embeddings import get_embedding
 from resources.llm_adapter import LocalLLMAdapter
 from resources.config.system_prompt import SYSTEM_PROMPT
+import json
 
 class RAGPipelineCosine:
     def __init__(self, chroma_path: str, collection_name: str,
@@ -29,7 +30,7 @@ class RAGPipelineCosine:
         ]
         return self.llm.chat(messages, max_tokens=512)
 
-    def run(self, group) -> str:
+    def run(self, group,split_page_file) -> str:
         user_query=group["user_query"]
         semantic_queries=group["semantic_queries"]
         all_docs=[]
@@ -40,12 +41,17 @@ class RAGPipelineCosine:
             docs_with_meta = self.retrieve(query, n_results=n_results)
             for doc, meta in docs_with_meta:
                 # print(meta) 
-                key=(meta['page'],meta['length'])
-                if key not in seen:   # deduplicate based on page
-                    seen.add(key)
-                    all_docs.append(doc)  
+                # key=(meta['page'],meta['length'])
+                page=meta['page']
+                print(page)
+                if page not in seen:   # deduplicate based on page
+                    seen.add(page)
+                    # all_docs.append(doc)  
+                    with open(split_page_file, "r", encoding="utf-8") as f:
+                        full_pages = json.load(f)
+                    all_docs.append(full_pages[page-1])
                 else:
-                    print(f"{key} repeated")
+                    print(f"Page {page} repeated")
 
         # print("\n=== Retrieved Docs Preview ===")
         # for d in all_docs:

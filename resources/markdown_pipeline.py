@@ -6,7 +6,7 @@ from resources.config import config
 from resources import chunker
 from resources.rag import RAGPipelineCosine
 from resources.retrieval_queries.sections import CREDIT_MEMO_SECTIONS
-
+from resources.split_md_by_page import split_md_by_page
 def load_prompts(file_path: str) -> dict:
     """Load YAML prompts as a dictionary of {section: prompt_text}."""
     with open(file_path, "r", encoding="utf-8") as f:
@@ -37,11 +37,12 @@ def run_pipeline(md_file: str, n_results: int = 5, query: str = None):
         results["single_query"] = {"question": query, "answer": answer}
         print(f"\n=== ANSWER ===\n{answer}")
     else:
+        split_page_file=split_md_by_page(md_file)
         for section, groups in CREDIT_MEMO_SECTIONS.items():
             print(f"Making section:{section}")
             section_results = []
             for group in groups:
-                answer = rag.run(group)
+                answer = rag.run(group,split_page_file)
                 section_results.append(answer)
             section_text="\n\n".join(section_results)
             results[section] = section_text

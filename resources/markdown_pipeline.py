@@ -7,12 +7,15 @@ from resources import chunker
 from resources.rag import RAGPipelineCosine
 from resources.retrieval_queries.sections import CREDIT_MEMO_SECTIONS
 from resources.split_md_by_page import split_md_by_page
+import time
+
 def load_prompts(file_path: str) -> dict:
     """Load YAML prompts as a dictionary of {section: prompt_text}."""
     with open(file_path, "r", encoding="utf-8") as f:
         return yaml.safe_load(f)
 
 def run_pipeline(md_file: str, n_results: int = 5, query: str = None):
+    start = time.time()
     print(f"[INFO] Starting pipeline with Markdown file: {md_file}")
 
     # Step 1: Chunk + embeddings
@@ -39,6 +42,7 @@ def run_pipeline(md_file: str, n_results: int = 5, query: str = None):
     else:
         split_page_file=split_md_by_page(md_file)
         for section, groups in CREDIT_MEMO_SECTIONS.items():
+            section_start = time.time()
             print(f"Making section:{section}")
             section_results = []
             for group in groups:
@@ -46,6 +50,8 @@ def run_pipeline(md_file: str, n_results: int = 5, query: str = None):
                 section_results.append(answer)
             section_text="\n\n".join(section_results)
             results[section] = section_text
+            section_end = time.time()
+            print(f"[INFO] Section '{section}' completed in {section_end - section_start:.2f} seconds.")
 
     # Step 3: Save results with timestamp
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
@@ -62,6 +68,9 @@ def run_pipeline(md_file: str, n_results: int = 5, query: str = None):
             f.write(f"\n{ans}\n\n")
 
     print(f"\n[INFO] Results saved to {output_path}")
+    end = time.time()
+    print(f"[INFO] Pipeline completed in {end - start:.2f} seconds.")
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Credit Memo from Markdown")

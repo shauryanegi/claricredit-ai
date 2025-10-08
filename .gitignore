@@ -22,6 +22,7 @@ Thumbs.db
 # Outputs (generated, not source)
 outputs/
 chroma_db/
+chroma_db_test_cosine2/
 
 # Config (local/server only, don’t push to Git)
 resources/config/config.py

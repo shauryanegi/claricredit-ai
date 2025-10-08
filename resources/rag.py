@@ -34,7 +34,8 @@ class RAGPipelineCosine:
         context = "\n\n".join(context_docs)
         messages = [
             {"role": "system", "content": SYSTEM_PROMPT},
-            {"role": "user", "content": f"Question: {query}\n\nContext:\n{context}\n\nAnswer:"}
+            # {"role": "user", "content": f"Question: {query}\n\nContext:\n{context}\n\nAnswer:"}
+            {"role": "user", "content": f"{query}\n\nContext:\n{context}"}
         ]
         return self.llm.chat(messages, max_tokens=512)
 
@@ -54,7 +55,7 @@ class RAGPipelineCosine:
                     # print(meta) 
                     # key=(meta['page'],meta['length'])
                     page=meta['page']
-                    # print(page)
+                    print("Choosing full page-",page)
                     if meta["type"]=="loan":
                         all_docs.append(doc)
                         # print("doc=",doc)

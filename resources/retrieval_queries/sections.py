@@ -1,188 +1,212 @@
 
 from datetime import datetime
 current_year = datetime.now().year
-
+bank_name="Maybank Malaysia"
 CREDIT_MEMO_SECTIONS = {
-    "FINANCIAL STATEMENT ANALYSIS (2-5 Years)": [
+    "Borrower, Management, and Ownership": [
         {
-            "user_query": """
-            /no_think Analyze the company's financial statements from the annual reports provided.
-            
-            Extract and discuss:
-            - Revenue trends: What are the actual revenue numbers? How much has it grown/declined year-over-year? What does this growth rate tell us about business momentum and market position?
-            - Profitability (margins, EBITDA): What are the actual margin percentages? Are they improving or declining? What does this say about pricing power, cost control, and operational efficiency?
-            - Assets, liabilities, equity: What are the actual balance sheet numbers? How is leverage changing? What does the asset composition tell us about the business?
-            - Cash flows: What are the actual cash flow numbers from operations, investing, financing? Is the company generating or consuming cash? What does this mean for sustainability?
-            
-            For EVERY number you extract, explain:
-            1. What the number actually is (state it clearly)
-            2. WHY this number is significant for credit assessment
-            3. What it reveals about the company's financial health and ability to repay debt
-            
-            Write in detailed paragraphs. Make every number meaningful by explaining its significance.
-            
+        "user_query": 
+        f"""Write about the-
+        - Board of directors/names of directors or management team
+        Only use relevant information from the context to generate the report as some part of the context could be irrelevant.
+        Do not include anything that is not present in the context
+        This output will directly be a part of a bigger report with remaining sections. So refrain from using conversational language.
+        """,
+
+        "semantic_queries": [                          
+            {"query": "Describe the company's board of directors including their names and positions", "k": 3},
+        ],
+            "full_page": True
+        },
+        {
+        "user_query": 
+        f"""Write about the-
+        - Relationship with {bank_name} (e.g., prior loans, payment history).
+        Only use relevant information from the context to generate the report as some part of the context could be irrelevant.
+        Do not include anything that is not present in the context
+        This output will directly be a part of a bigger report with remaining sections. So refrain from using conversational language.""",
+
+        "semantic_queries": [                
+            {"query": "Company's relationship history with the bank","k":3,"filter":"loan"},         
+        ],
+            "full_page": True
+        },
+        {
+        "user_query": 
+        f"""Write regarding-
+        - About the company
+        - What the company does
+        - Overview of the industry
+        Be elaborate. Include as many facts as you can from the provided context.
+        Do not include anything that is not present in the context
+        This output will directly be a part of a bigger report with remaining sections. So refrain from using conversational language.""",
+        "semantic_queries": [                
+            {"query": "About us, what we do, our history", "k": 3},
+        ],
+            "full_page": True
+        },
+        {
+        "user_query": 
+        """Write about the-
+        - Percentage shares of the directors
+        - any information about shareholders
+        Only use relevant information from the context to generate the report as some part of the context could be irrelevant.
+        Do not include anything that is not present in the context
+        This output will directly be a part of a bigger report with remaining sections. So refrain from using conversational language.""",
+            "semantic_queries": [
+                {"query": "Who are the shareholders of the company, and how are shares distributed among them?", "k": 3}, 
+            ],
+            "full_page": True
+        }
+    ],
+  "Financial Analysis": [
+    {
+      "user_query": """
+        /no_think Analyze the company's financial statements from the annual reports provided.
+        
+        Extract and discuss:
+        - Revenue trends: What are the actual revenue numbers? How much has it grown/declined year-over-year? What does this growth rate tell us about business momentum and market position?
+        - Profitability (margins, EBITDA): What are the actual margin percentages? Are they improving or declining? What does this say about pricing power, cost control, and operational efficiency?
+        - Assets, liabilities, equity: What are the actual balance sheet numbers? How is leverage changing? What does the asset composition tell us about the business?
+        - Cash flows: What are the actual cash flow numbers from operations, investing, financing? Is the company generating or consuming cash? What does this mean for sustainability?
+        
+        For EVERY number you extract, explain:
+        1. What the number actually is (state it clearly)
+        2. WHY this number is significant for credit assessment
+        3. What it reveals about the company's financial health and ability to repay debt
+        
+        Write in detailed paragraphs. Make every number meaningful by explaining its significance.
+        
             """,
             "semantic_queries": [
                 {"query": "annual report financial statements income statement revenue EBITDA net income profit", "k": 2},
                 {"query": "balance sheet assets liabilities equity shareholders equity total debt", "k": 2},
                 {"query": "year over year financial performance growth margins profitability trends", "k": 1}
-            ],
+        ],
             "full_page": True
-        }
-    ],
-    "Key Ratios": [
-        {
+            },
+            {
             "user_query": """
-            /no_think You are a credit analyst. Using the extracted information from the company’s financial documents, produce a **detailed, plain-language analysis of key financial ratios**. Focus only on ratios, including but not limited to:
-            
-            - DSCR (Debt Service Coverage Ratio)
-            - Debt-to-EBITDA
-            - LTV (Loan-to-Value)
-            - Current Ratio, Quick Ratio
-            - Net Gearing
-            - Interest Coverage
-            
-            FINANCIAL VALUE:
-            DSCR: 1.7X
-            Debt-to-EBITDA: 1.5X
-            LTV: 65%
-            
-            
-            Instructions:
-            
-            1. For each ratio, clearly explain:
-            - What the ratio value actually means in simple terms
-            - How it compares to typical thresholds, regulatory limits, or industry standards
-            - What it implies about the company’s **repayment ability, liquidity, leverage, and creditworthiness**
-            - Any cushion or buffer (e.g., cash flow cushion for DSCR, equity buffer for LTV)
-            - How sensitive the ratio is to adverse changes (e.g., how much cash flow could drop before DSCR breaches 1.25x)
-            
-            2. Do **not** discuss unrelated items like loans, derivatives, fair value, or swaps unless directly tied to a ratio.
-            
-            3. Present each ratio as a separate section with:
-            - The ratio name and actual value
-            - Plain-language explanation
-            - Significance and risk assessment
-            - Optional comparison to prior periods if available
-            
-            Write detailed paragraphs for each ratio. Don't just state numbers - explain what they MEAN and why they MATTER.
+        /no_think You are a credit analyst. Using the extracted information from the company’s financial documents, produce a **detailed, plain-language analysis of key financial ratios**. Focus only on ratios, including but not limited to:
+        
+        - DSCR (Debt Service Coverage Ratio)
+        - Debt-to-EBITDA
+        - LTV (Loan-to-Value)
+        - Current Ratio, Quick Ratio
+        - Net Gearing
+        - Interest Coverage
+        
+        FINANCIAL VALUE:
+        DSCR: 1.7X
+        Debt-to-EBITDA: 1.5X
+        LTV: 65%
+        
+        
+        Instructions:
+        
+        1. For each ratio, clearly explain:
+        - What the ratio value actually means in simple terms
+        - How it compares to typical thresholds, regulatory limits, or industry standards
+        - What it implies about the company’s **repayment ability, liquidity, leverage, and creditworthiness**
+        - Any cushion or buffer (e.g., cash flow cushion for DSCR, equity buffer for LTV)
+        - How sensitive the ratio is to adverse changes (e.g., how much cash flow could drop before DSCR breaches 1.25x)
+        
+        2. Do **not** discuss unrelated items like loans, derivatives, fair value, or swaps unless directly tied to a ratio.
+        
+        3. Present each ratio as a separate section with:
+        - The ratio name and actual value
+        - Plain-language explanation
+        - Significance and risk assessment
+        - Optional comparison to prior periods if available
+        
+        Write detailed paragraphs for each ratio. Don't just state numbers - explain what they MEAN and why they MATTER.
             """,
             "semantic_queries": [
                 {"query": "current ratio, quick ratio, total assets liabilities", "k": 2},
             ],
             "full_page": True
-        }
-    ],
-    "Cashflow": [
-        {
+            },
+            {
             "user_query": """
-            /no_think Analyze the company’s cash flow statements from the annual reports to assess business quality and repayment capacity. Focus on:
-            
-            **Operating Cash Flow (OCF):**
-            - Report actual OCF values for each year.
-            - Describe the trend (growing, stable, or declining) and magnitude of change.
-            - Explain what this pattern indicates about the company’s cash generation strength and stability.
-            - Assess whether OCF comfortably covers debt servicing needs.
-            
-            **Investing Cash Flow (ICF):**
-            - Summarize spending on capital expenditures and investments.
-            - Interpret what this investment level reveals about growth priorities and long-term sustainability.
-            
-            **Financing Cash Flow (FCF):**
-            - Explain whether the company is raising or repaying debt, and note any dividend or distribution payments.
-            - Discuss how these flows affect leverage and liquidity.
-            
-            **Free Cash Flow (if available):**
-            - Report the actual FCF value and assess whether it provides a cushion for debt service.
-            
-            **Cash Flow Outlook (if mentioned):**
-            - Summarize projected cash flows and comment on their realism compared to historical performance.
-            - Evaluate whether projected flows support timely loan repayment.
-            
-            For every cash flow metric, explain:
-            - The actual figure,
-            - What it implies about operational performance,
-            - Whether it ensures adequate debt coverage,
-            - And what risks or vulnerabilities exist to ongoing cash generation.
-            
-            **Note: Do not calculate anything on your own use values only from context
-
-            Write detailed analytical paragraphs integrating these insights into an overall assessment of repayment confidence.
+        /no_think Analyze the company’s cash flow statements from the annual reports to assess business quality and repayment capacity. Focus on:
+        
+        **Operating Cash Flow (OCF):**
+        - Report actual OCF values for each year.
+        - Describe the trend (growing, stable, or declining) and magnitude of change.
+        - Explain what this pattern indicates about the company’s cash generation strength and stability.
+        - Assess whether OCF comfortably covers debt servicing needs.
+        
+        **Investing Cash Flow (ICF):**
+        - Summarize spending on capital expenditures and investments.
+        - Interpret what this investment level reveals about growth priorities and long-term sustainability.
+        
+        **Financing Cash Flow (FCF):**
+        - Explain whether the company is raising or repaying debt, and note any dividend or distribution payments.
+        - Discuss how these flows affect leverage and liquidity.
+        
+        **Free Cash Flow (if available):**
+        - Report the actual FCF value and assess whether it provides a cushion for debt service.
+        
+        **Cash Flow Outlook (if mentioned):**
+        - Summarize projected cash flows and comment on their realism compared to historical performance.
+        - Evaluate whether projected flows support timely loan repayment.
+        
+        For every cash flow metric, explain:
+        - The actual figure,
+        - What it implies about operational performance,
+        - Whether it ensures adequate debt coverage,
+        - And what risks or vulnerabilities exist to ongoing cash generation.
+        
+        **Note: Do not calculate anything on your own use values only from context
+        
+        Write detailed analytical paragraphs integrating these insights into an overall assessment of repayment confidence.
             """,
             "semantic_queries": [
                 {"query": "consolidated cash flow from operations operating cash flow OCF annual report", "k": 2},
                 {"query": "capital expenditures CapEx investing cash flow investments", "k": 2},
                 {"query": "free cash flow FCF cash available debt service", "k": 1},
                 {"query": "cash flow projections forecast future cash flow", "k": 1},
-            ],
+        ],
             "full_page": True
             }
         ],
         "Collateral and Security": [
-            {
+        {
             "user_query": """
-            /no_think You are a credit analyst. Using the retrieved information about the company’s pledged assets and appraisals, provide a detailed **collateral adequacy analysis** in the context of the proposed loan structure.
-            
-            ### Instructions:
-            
-            1. **Description of Pledged Assets**
-            - Identify each asset pledged (e.g., plant & machinery, land, accounts receivable, inventory).
-            - Include appraised values and any notes on valuation methodology or recent appraisal dates.
-            
-            2. **Loan-to-Value (LTV) Assessment**
-            - Compare the total appraised value of pledged assets to the proposed loan amount.
-            - Calculate or confirm the LTV ratio.
-            - Discuss whether the LTV indicates adequate collateral coverage relative to industry norms or bank thresholds.
-            
-            3. **Collateral Quality & Perfection**
-            - Assess the type and quality of assets (liquid vs. illiquid, fixed vs. current, marketable vs. specialized).
-            - Mention if liens or security interests are perfected or legally enforceable.
-            
-            4. **Adequacy vs. Proposed Loan**
-            - Discuss whether the pledged collateral adequately supports the proposed loan of RM 7,500,000.
-            - Consider sources and uses of funds (e.g., new plant, acquisition, working capital) and whether the collateral provides sufficient protection.
-            
-            5. **Overall Implications**
-            - Explain how collateral quality and LTV affect the lender’s risk.
-            - Highlight any gaps, risks, or recommendations regarding additional security or monitoring.
-            
-            ### Loan Structure (for reference):
-            ##Sources and Uses of Funds
-            #Sources of Funds
-            -Proposed Term Loan: RM 7,500,000
-            -Internal Accruals: RM 2,500,000
-            -Total Sources: RM 10,000,000
-            #Uses of Funds
-            -New Plant Construction: RM 4,000,000
-            -Acquisition of Competitor: RM 5,000,000
-            -Working Capital Buffer: RM 1,000,000
-            -Total Uses: RM 10,000,000
-            #Proposed Loan Facility
-            -Loan Amount: RM 7,500,000
-            -Interest Rate: 10% p.a. (fixed)
-            -Loan Term: 10 years
-            
-            Repayment Schedule: Equal annual installments of principal and interest
-            #Purpose of Funds
-            The funds will be utilized for capital expenditure related to the construction of a new plant, the strategic acquisition of a key competitor, and to maintain an adequate working capital buffer.
-            ## Collateral Analysis
-            #Assets Pledged
-            -Existing Plant & Machinery – Appraised Value: RM 6,000,000
-            -Land Parcel (Industrial) – Appraised Value: RM 5,000,000
-            -Accounts Receivable – Appraised Value: RM 2,000,000
-            -Collateral Adequacy
-            -Total Appraised Value: RM 13,000,000
-            -Loan Amount: RM 7,500,000
-            -Calculated Loan-to-Value (LTV) Ratio: ~65%
-            
-            Write **detailed paragraphs**, not bullet points, integrating numeric insights (appraised values, LTV) and interpreting what the collateral picture means for **loan security and risk**.
+        /no_think You are a credit analyst. Using the retrieved information about the company’s pledged assets and appraisals, provide a detailed **collateral adequacy analysis** in the context of the proposed loan structure.
+        
+        ### Instructions:
+        
+        1. **Description of Pledged Assets**
+        - Identify each asset pledged (e.g., plant & machinery, land, accounts receivable, inventory).
+        - Include appraised values and any notes on valuation methodology or recent appraisal dates.
+        
+        2. **Loan-to-Value (LTV) Assessment**
+        - Compare the total appraised value of pledged assets to the proposed loan amount.
+        - Calculate or confirm the LTV ratio.
+        - Discuss whether the LTV indicates adequate collateral coverage relative to industry norms or bank thresholds.
+        
+        3. **Collateral Quality & Perfection**
+        - Assess the type and quality of assets (liquid vs. illiquid, fixed vs. current, marketable vs. specialized).
+        - Mention if liens or security interests are perfected or legally enforceable.
+        
+        4. **Adequacy vs. Proposed Loan**
+        - Discuss whether the pledged collateral adequately supports the proposed loan of RM 7,500,000.
+        - Consider sources and uses of funds (e.g., new plant, acquisition, working capital) and whether the collateral provides sufficient protection.
+        
+        5. **Overall Implications**
+        - Explain how collateral quality and LTV affect the lender’s risk.
+        - Highlight any gaps, risks, or recommendations regarding additional security or monitoring.
+        
+        
+        Write **detailed paragraphs**, not bullet points, integrating numeric insights (appraised values, LTV) and interpreting what the collateral picture means for **loan security and risk**.
             """,
             "semantic_queries": [
             {"query": "total assets, liabilities, real estate, equipment, inventory)", "k":2, "filter":"loan"},
             ],
             "full_page": True
         }
-    ],
+        ],
     "Risk Assessment": [
         {
             "user_query": """
@@ -478,34 +502,81 @@ CREDIT_MEMO_SECTIONS = {
             ],
             "full_page": False
         }
+    ],
+    "Loan Structure and Terms": [
+        {
+            "user_query": """
+            You are a senior credit analyst. Using only the provided context, prepare a **professional narrative section** summarizing the company’s **Loan Structure and Terms** relevant to the credit proposal.
+
+            ### INSTRUCTIONS:
+            1. **Style & Tone:**  
+            - Write in a formal, analytical, and concise tone consistent with professional credit memos.  
+            - Use clear subheadings and maintain consistent formatting with other memo sections.  
+            - Do not fabricate or infer details beyond what is explicitly available in the context.  
+
+            2. **Content Expectations:**  
+            - Present a structured summary that covers all key components of the proposed financing arrangement:  
+                - **Loan Amount**   
+                - **Interest Rate**
+                - **Tenor / Maturity** 
+                - **Repayment Terms** 
+                - **Covenants** 
+                - **Fees / Charges** (if disclosed)  
+                - **Purpose of Funds** (briefly explain intended use)  
+                - **Sources and Uses of Funds Table:**  
+                    Present in a structured, readable format different sources of funds and their amounts if available
+                - **Uses of Funds**  
+                    Present in a structured, readable format different uses of funds and their amounts if available
+                    
+
+            3. **Formatting:**
+            - Use bold section headers such as **Loan Amount**, **Interest Rate**, **Repayment Terms**, etc.  
+            - Use bullet points or short structured lines for clarity where applicable.
+            - Use tabular structure where appropriate.
+
+            4. **Factual Integrity:**  
+            - Cite all figures and data exactly as they appear.  
+            - Do not add assumptions or rephrase quantitative details.  
+            - If certain details (e.g., covenants or fees) are missing, explicitly state:  
+            “No information on [covenants/fees/etc.] is disclosed in the provided context.”
+
+            5. **Closing Summary:**  
+            - End with a concise analytical paragraph summarizing:  
+            - How well the loan structure aligns with the borrower’s funding needs and repayment capacity.  
+            - Whether the structure is consistent with the bank’s policy and prudent credit practice.
+
+            ### OUTPUT EXAMPLE:
+            **Loan Amount:** RM 7,500,000  
+            **Interest Rate:** 10% p.a. (fixed)  
+            **Tenor:** 10 years  
+            **Repayment Terms:** Equal annual installments of principal and interest.  
+            **Covenants:** Debt/EBITDA < 3x; Minimum DSCR 1.2x.  
+            **Fees:** 0.5% processing fee.  
+            **Purpose of Funds:** To finance the construction of a new plant, acquisition of a competitor, and working capital buffer [Credit Proposal, p.15].
+
+            **Sources of Funds**  
+            What are the sources of funds for the loan?
+            
+
+            **Uses of Funds**  
+            What are the uses of funds for the loan?
+
+            **Summary:**  
+            Summarize
+
+            If no loan terms are disclosed, state:  
+            "The provided context does not contain details regarding loan amount, structure, or repayment terms."
+
+            """,
+            "semantic_queries": [
+                {"query": "Proposed loan amount, structure, and purpose of funds", "k": 2, "filter": "loan"},
+                {"query": "Loan amount, interest rate, tenor, and repayment schedule", "k": 2, "filter": "loan"},
+                {"query": "Financial covenants and loan conditions such as debt to EBITDA, DSCR, etc.", "k": 2, "filter": "loan"},
+                {"query": "Sources and uses of funds breakdown", "k": 2, "filter": "loan"},
+                {"query": "Any applicable fees, charges, or facility costs", "k": 2, "filter": "loan"}
+            ],
+            "full_page": True
+        }
     ]
 
 }
-
-
-
-# ignore
-        # "semantic_queries": [
-        #     {"query": "Provide a summary of the company, including its history, core business operations, and what products or services it offers.", "k": 3},
-        #     {"query": "Who are the shareholders of the company, and how are shares distributed among them?", "k": 3},
-        #     {"query": "Describe the company's management team and board of directors, including the organizational structure.", "k": 3},
-        # ],
-        # "user_queries":[
-        #     """Generate the 'Borrower, Management' section of the credit memo. 
-        #     It should include the 
-        #     - Company history
-        #     - the names of directors 
-        #     - overview of the industry
-        #     Be elaborate. Include as many facts as you can from the provided context.
-        #     Do not include anything that is not present in the context""",
-
-        #     """Generate the 'Ownership' section of the credit memo. 
-        #     It should include the 
-        #     - the no. of shares/ percentwise shares of directors if available
-        #     - any information about shareholders
-        #     - and any other important information if present.
-        #     Especialy include any CORRECT numerical information about shares if present).
-        #     Be elaborate. Include as many facts as you can from the provided context.
-        #     Do not include anything that is not present in the context""",
-        #     ]
-        # "user_queries": [

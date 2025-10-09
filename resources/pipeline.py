@@ -4,15 +4,20 @@ import argparse
 from resources.config import config
 from resources import extractor, chunker
 from resources.rag import RAGPipelineCosine
+from resources.split_md_by_page import split_md_by_page
+from resources.retrieval_queries.sections import CREDIT_MEMO_SECTIONS
+import time
+
 
 def load_prompts(file_path: str) -> dict:
     """Load YAML prompts as a dictionary of {section: prompt_text}."""
     with open(file_path, "r", encoding="utf-8") as f:
         return yaml.safe_load(f)
 
+
 def main(n_results: int = 5):
     print("[INFO] Starting Credit Memo Pipeline...")
-
+    start = time.time()
     # Step 1: Extract PDF → Markdown
     # Adjust filename as needed; you could also make this an argument.
     pdf_file = os.path.join(config.PDF_DIR, "Gamuda.pdf")
@@ -36,11 +41,18 @@ def main(n_results: int = 5):
     prompts = load_prompts(prompts_file)
 
     results = {}
-    for section, prompt in prompts.items():
-        print(f"\n[INFO] Running section: {section}")
-        answer = rag.run(prompt, n_results=n_results)
-        results[section] = answer
-        print(f"\n=== {section.upper()} ===\n{answer}")
+    split_page_file = split_md_by_page(md_file)
+    for section, groups in CREDIT_MEMO_SECTIONS.items():
+        section_start = time.time()
+        print(f"Making section:{section}")
+        section_results = []
+        for group in groups:
+            answer = rag.run(group, split_page_file)
+            section_results.append(answer)
+        section_text = "\n\n".join(section_results)
+        results[section] = section_text
+        section_end = time.time()
+        print(f"[INFO] Section '{section}' completed in {section_end - section_start:.2f} seconds.")
 
     # Step 5: Save results
     output_path = os.path.join(config.OUTPUT_DIR, "credit_memo.md")
@@ -49,6 +61,9 @@ def main(n_results: int = 5):
             f.write(f"## {section.replace('_', ' ').title()}\n\n")
             f.write(answer + "\n\n")
     print(f"\n[INFO] Credit memo saved to {output_path}")
+    end = time.time()
+    print(f"[INFO] Total time taken: {end - start:.2f} seconds.")
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Credit Memo Generator")

@@ -22,6 +22,7 @@ def extract_pdf(pdf_path: str, retries: int = 3, timeout: int = 300) -> str:
     Send PDF to Marker API and save markdown output.
     Retries multiple times with long timeout before giving up.
     """
+    start_time = time.time()
     base_url = config.LLM_ENDPOINT.split("/api")[0]
     url = f"{base_url}/api/v1/marker-text-extraction"
     print(f"[INFO] Using Marker API: {url}")
@@ -56,6 +57,8 @@ def extract_pdf(pdf_path: str, retries: int = 3, timeout: int = 300) -> str:
                 f.write(md_text)
 
             print(f"[INFO] Saved extracted markdown to {output_path}")
+            end_time = time.time()
+            print(f"[INFO] Extraction completed in {end_time - start_time:.2f} seconds.")
             return output_path
 
         except requests.exceptions.Timeout:
@@ -69,6 +72,9 @@ def extract_pdf(pdf_path: str, retries: int = 3, timeout: int = 300) -> str:
             wait = 5 * attempt  # exponential backoff: 5s, 10s, ...
             print(f"[INFO] Retrying in {wait}s...")
             time.sleep(wait)
+
+    end_time = time.time()
+    print(f"[ERROR] All attempts failed after {end_time - start_time:.2f} seconds.")
 
     raise RuntimeError(f"[FATAL] All {retries} attempts failed. Last error: {last_error}")
 

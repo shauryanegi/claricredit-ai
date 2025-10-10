@@ -15,12 +15,12 @@ def load_prompts(file_path: str) -> dict:
         return yaml.safe_load(f)
 
 
-def main(n_results: int = 5):
+def main(pdf_name: str, n_results: int = 5):
     print("[INFO] Starting Credit Memo Pipeline...")
     start = time.time()
     # Step 1: Extract PDF → Markdown
     # Adjust filename as needed; you could also make this an argument.
-    pdf_file = os.path.join(config.PDF_DIR, "Gamuda.pdf")
+    pdf_file = os.path.join(config.PDF_DIR, pdf_name)
     md_file = extractor.extract_pdf(pdf_file)
 
     # Step 2: Chunk + embeddings
@@ -55,7 +55,8 @@ def main(n_results: int = 5):
         print(f"[INFO] Section '{section}' completed in {section_end - section_start:.2f} seconds.")
 
     # Step 5: Save results
-    output_path = os.path.join(config.OUTPUT_DIR, "credit_memo.md")
+    filename = os.path.basename(pdf_file).replace(".pdf", "")
+    output_path = os.path.join(config.OUTPUT_DIR, f"credit_memo_{filename}.md")
     with open(output_path, "w", encoding="utf-8") as f:
         for section, answer in results.items():
             f.write(f"## {section.replace('_', ' ').title()}\n\n")
@@ -67,7 +68,8 @@ def main(n_results: int = 5):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Credit Memo Generator")
+    parser.add_argument("--pdf", type=str, help="Name of the PDF file in the files directory", required=True)
     parser.add_argument("--n_results", type=int, default=5, help="Number of retrieved docs per query")
     args = parser.parse_args()
 
-    main(n_results=args.n_results)
+    main(pdf_name=args.pdf, n_results=args.n_results)

@@ -94,10 +94,10 @@ Calculated Loan-to-Value (LTV) Ratio: ~65%""")
                     user_query=group["user_query"]
                     answer = rag.generate_answer(user_query,summary_context)
                 else:
-                  answer = rag.run(group,split_page_file)
-                  if group.get("include_for_summary"):
-                    print(f"part of {section} included in summary")
-                    summary_context.append(answer)
+                    answer = rag.run(group,split_page_file)
+                    if group.get("include_for_summary"):
+                        print(f"part of {section} included in summary")
+                        summary_context.append(answer)
                 section_results.append(answer)
             section_text="\n\n".join(section_results)
             results[section] = section_text

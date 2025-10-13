@@ -59,7 +59,7 @@ CREDIT_MEMO_SECTIONS = {
             "full_page": True
         }
     ],
-  "Financial Analysis": [
+   "Financial Analysis": [
     {
       "user_query": """
         /no_think Analyze the company's financial statements from the annual reports provided.
@@ -68,20 +68,21 @@ CREDIT_MEMO_SECTIONS = {
         - Revenue trends: What are the actual revenue numbers? How much has it grown/declined year-over-year? What does this growth rate tell us about business momentum and market position?
         - Profitability (margins, EBITDA): What are the actual margin percentages? Are they improving or declining? What does this say about pricing power, cost control, and operational efficiency?
         - Assets, liabilities, equity: What are the actual balance sheet numbers? How is leverage changing? What does the asset composition tell us about the business?
-        - Cash flows: What are the actual cash flow numbers from operations, investing, financing? Is the company generating or consuming cash? What does this mean for sustainability?
-        
+ 
         For EVERY number you extract, explain:
         1. What the number actually is (state it clearly)
         2. WHY this number is significant for credit assessment
         3. What it reveals about the company's financial health and ability to repay debt
         
+        Note: Only take up values from the given context and do not calculate or assume values.
+ 
         Write in detailed paragraphs. Make every number meaningful by explaining its significance.
         
             """,
             "semantic_queries": [
                 {"query": "annual report financial statements income statement revenue EBITDA net income profit", "k": 2},
                 {"query": "balance sheet assets liabilities equity shareholders equity total debt", "k": 2},
-                {"query": "year over year financial performance growth margins profitability trends", "k": 1}
+                {"query": "year over year financial performance, total revenue growth margins profitability trends", "k": 1}
         ],
             "full_page": True
             },
@@ -119,12 +120,15 @@ CREDIT_MEMO_SECTIONS = {
         - Significance and risk assessment
         - Optional comparison to prior periods if available
         
+        Note: Only take up values from the given context and do not calculate or assume values.
+ 
         Write detailed paragraphs for each ratio. Don't just state numbers - explain what they MEAN and why they MATTER.
             """,
             "semantic_queries": [
-                {"query": "current ratio, quick ratio, total assets liabilities", "k": 2},
+                {"query": "capital management, gearing ratio, net debt", "k":2, "filter": "table"},
+                {"query": "current ratio, quick ratio, total assets liabilities", "k": 2, "filter":"table"},
             ],
-            "full_page": True, 
+            "full_page": True,
             "include_for_summary":True
             },
             {
@@ -164,11 +168,11 @@ CREDIT_MEMO_SECTIONS = {
             """,
             "semantic_queries": [
                 {"query": "consolidated cash flow from operations operating cash flow OCF annual report", "k": 2},
-                {"query": "capital expenditures CapEx investing cash flow investments", "k": 2},
-                {"query": "free cash flow FCF cash available debt service", "k": 1},
-                {"query": "cash flow projections forecast future cash flow", "k": 1},
+               # {"query": "free cash flow FCF cash available debt service", "k": 1},
+               # {"query": "cash flow projections forecast future cash flow", "k": 1},
+                {"query": "statement of cash flows, net cash used, cash used in investing activities, operating activities, financing activites", "k":4, "filter":"table"},
         ],
-            "full_page": True
+            "full_page": False
             }
         ],
         "Collateral and Security": [

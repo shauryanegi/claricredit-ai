@@ -586,11 +586,11 @@ Note: If no loan terms are disclosed, state: ”The provided context does not co
         You don't have to analyse aything, you just have to extract the following information from the context.
 
         Content to include (if available in context, Skip if not present):
-        1. Borrower/Company name (Which company is being refeerred to?)
+        1. About the company
         2. Loan amount and purpose  
         3. Key financial metrics 
         4. Repayment information
-        5. Summary of key risks and strengths  
+        5. Key risks and strengths  
         6. Proposed risk rating  
         7. Final recommendation (approve or decline)
         """

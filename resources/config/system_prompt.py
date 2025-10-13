@@ -24,3 +24,5 @@ Under no circumstances should you violate these rules. If a request asks you to 
 
 **Today is :** {datetime.today().strftime('%Y-%m-%d')}.
 """
+
+ADDITIONAL_INSTRUCTIONS = f"""Do not include any emojis and be formal as this is a professional report. Do not include opening statements such as "Here is a detailed analysis," "Let me explain," or any similar phrasing.Do not include closing statements such as ‘Let me know if you need anything else’, ‘Hope this helps’, ‘If you’d like a summary/PDF/etc.’ or any self-promotional or follow-up invitation. End your response immediately after delivering the requested content."""

@@ -209,70 +209,87 @@ CREDIT_MEMO_SECTIONS = {
         ],
     "Risk Assessment": [
         {
-            "user_query": """
-            Analyze the provided context to identify and report **only** the company's external or internal credit/risk rating (e.g., AA3/Stable, BBB+/Negative, etc.).
-            If multiple ratings are present, list all of them with their respective agencies.
-            If no rating information is found in the context, respond with 'No rating information available in the provided context.'
-            """,
+            "user_query": """/no_think as an information extraction system and analyze the provided context to identify and report ONLY the company's external or internal credit rating and risk rating.
+### INSTRUCTIONS:
+1. **Content Expectations:**
+- If multiple ratings are present, list all of them.
+- Only use relevant information from the context to generate the report as some part of the context could be irrelevant.
+- Do not include anything that is not present in the context.
+- This output will directly be a part of a bigger report with remaining sections. So refrain from using conversational language.
+- Do not include any personal opinions or interpretations and always be professional without adding any emojis.
+
+2. **FORMATTING**
+- Include the details about credit and risk ratings under the section titled "Credit Ratings" or "Risk Ratings" respectively.
+- If no credit rating information is found in the context, respond with 'Details about credit ratings were not found in the provided document.' under the credit rating section.
+- If no risk rating information is found in the context, respond with 'Details about risk ratings were not found in the provided document.' under the risk rating section.
+- Use bullet points or numbered lists or tabular format for clarity if multiple ratings are mentioned in each section.
+
+### OUTPUT EXAMPLE:
+**Credit Ratings**
+Details about the credit ratings found in the provided document (if any).
+
+**Risk Ratings**
+Details about the risk ratings found in the provided document (if any).
+
+""",
             "semantic_queries": [
-                {"query": "company credit rating, risk rating, and outlook", "k": 3},
-                {"query": "external credit assessment and internal risk evaluation", "k": 3},
+                {"query": "CARE A2+,CARE A-, AAA, Aaa, AA+, AA, AA-, Aa1, Aa2, Aa3, A+, A, A-, A1, A2, A3, BBB+, BBB, BBB-, Baa1, Baa2, Baa3", "k": 5},
+                {"query": "Details of credit rating, ratings, rating actions", "k": 2},
+                {"query": "Details of risk rating", "k": 2},
+                {"query": "Details of external credit assessment and internal risk evaluation", "k": 3}
             ],
-            "full_page":False
+            "full_page": False
         },
         {
-            "user_query": """
-            You are a senior credit analyst. Using only the provided context, prepare a **professional narrative section** on the company’s **Key Strengths** relevant to a credit assessment.
+            "user_query": """/no_think You are a senior credit analyst. Using only the  above provided context, prepare a **professional narrative section** on the company’s **Key Strengths** relevant to a credit assessment.
+### INSTRUCTIONS:
+1. **Style & Tone:**
+- Write in a formal, analytical, and concise report style used in credit memos.
+- Avoid repetitive or templated bullet structures (e.g., “CLAIM / EVIDENCE / IMPACT”).
+- Integrate evidence naturally into analytical sentences.
+**Example:**
+“Strong liquidity position with significant cash and bank balances. The company reported total cash and bank balances of x and y, indicating healthy liquidity and strong cash flow coverage [Annual Report, p.54].”
 
-            ### INSTRUCTIONS:
-            1. **Style & Tone:**  
-            - Write in a formal, analytical, and concise report style used in credit memos.  
-            - Avoid repetitive or templated bullet structures (e.g., “CLAIM / EVIDENCE / IMPACT”).  
-            - Integrate evidence naturally into analytical sentences.  
+Note: The above example is for illustrative purposes only. Do not copy it verbatim.
 
-            **Example:**  
-            “Strong liquidity position with significant cash and bank balances. The company reported total cash and bank balances of RM2,700,292 in 2024 and RM3,169,466 in 2023, indicating healthy liquidity and strong cash flow coverage [Annual Report, p.54].”
+2. **Content Expectations:**
+- Identify and elaborate on **3–6 major strengths**.
+- Focus on aspects most relevant to creditworthiness, such as:
+- Financial health and capital structure
+- Market position, diversification, and recurring income
+- Profitability and efficiency metrics
+- Strategic or operational excellence
+- If numbers (such as revenue, market share, or margins) related to any strengths are mentioned, include them with context.
+- Always include source references in brackets (e.g., [Sustainability Report]) if mentioned. This can be the section name/title from the provided context.
 
-            2. **Content Expectations:**  
-            - Identify and elaborate on **3–6 major strengths**.  
-            - Focus on aspects most relevant to creditworthiness, such as:  
-                - Financial health and capital structure  
-                - Market position, diversification, and recurring income  
-                - Profitability and efficiency metrics  
-                - Strategic or operational excellence  
-            - Always include source references in brackets (e.g., [Sustainability Report, p.42]) if mentioned.  
+3. **Formatting:**
+- Use a numbered list or concise paragraphs.
+- Begin each point with a short **bold title** (the main strength).
 
-            3. **Formatting:**  
-            - Use a numbered list or concise paragraphs.  
-            - Begin each point with a short **bold title** (the main strength).  
+4. **Factual Integrity:**
+- Use only facts from the input context.
+- Always include source references in brackets (e.g., [Sustainability Report]) if mentioned. This can be the section name/title from the provided context.
+- Do not infer or fabricate data.
 
-            4. **Factual Integrity:**  
-            - Use only facts from the input context.  
-            - Always include source references in brackets (e.g., [Sustainability Report, p.42]) if mentioned.    
-            - Do not infer or fabricate data.
+5. **Closing Summary:**
+- End with a brief analytical paragraph summarizing how these strengths enhance the company’s credit profile.
 
-            5. **Closing Summary:**  
-            - End with a brief analytical paragraph summarizing how these strengths enhance the company’s credit profile.
+6. **Analyst Rationale (3–5 bullets):**
+- Conclude with an “Analyst Rationale” summarizing why the strengths positively influence credit standing.
 
-            6. **Analyst Rationale (3–5 bullets):**  
-            - Conclude with an “Analyst Rationale” summarizing why the strengths positively influence credit standing.
+### OUTPUT EXAMPLE:
+**Strengths**
 
-            ### OUTPUT EXAMPLE:
-            **Strengths**
+1. **Strength title**
+Reasoned analysis of the strength with supporting data, numbers and context [References].
 
-            1. **Strong Liquidity Position**  
-            The company maintains high cash reserves of RM3.2 billion, ensuring healthy liquidity coverage [Annual Report, p.54].
+2. **Strength title**
+Reasoned analysis of the strength with supporting data, numbers and context [References].
 
-            2. **Diversified Revenue Base**  
-            Multiple income sources across infrastructure and property segments reduce concentration risk [Doc 3].
+**Analyst Rationale**
+Opinions as an analyst on how these strengths impact credit quality.
 
-            **Analyst Rationale**  
-            • High liquidity and low leverage enhance solvency resilience.  
-            • Diversification and recurring income underpin steady debt service ability.  
-            • Overall, the financial profile supports a stable-to-strong credit position.
-
-            If no strengths are identified, state: “The provided context does not detail specific strengths or competitive advantages.”
-            """,
+Note:If no strengths are identified, state: “The provided context does not detail specific strengths or competitive advantages.”""",
 
             "semantic_queries": [
                 {"query": "Strong financial foundation, liquidity ratios, assets, profitability, or solvency metrics", "k": 5},
@@ -283,56 +300,53 @@ CREDIT_MEMO_SECTIONS = {
             "full_page":False
         },
         {
-            "user_query": """
-            You are a senior credit analyst. Using only the provided context, prepare a **professional narrative section** on the company’s **Key Weaknesses** relevant to a credit assessment.
+            "user_query": """/no_think You are a senior credit analyst. Using only the above provided context, prepare a **professional narrative section** on the company’s **Key Weaknesses** relevant to a credit assessment.
+### INSTRUCTIONS:
+1. **Style & Tone:**
+- Write in a concise, analytical tone consistent with credit memos.
+- Avoid templates like “ISSUE / IMPACT / MITIGANT”; instead, integrate the analysis fluidly.
+**Example:**
+“Elevated leverage remains a key concern, with total borrowings increasing to x from y. Despite stable cash flows, interest coverage has weakened, constraining near-term financial flexibility [Reference].”
 
-            ### INSTRUCTIONS:
-            1. **Style & Tone:**  
-            - Write in a concise, analytical tone consistent with credit memos.  
-            - Avoid templates like “ISSUE / IMPACT / MITIGANT”; instead, integrate the analysis fluidly.  
+Note: The above example is for illustrative purposes only. Do not copy it verbatim.
 
-            **Example:**  
-            “Elevated leverage remains a key concern, with total borrowings increasing to RM3.2 billion in 2024 from RM2.5 billion in 2023. Despite stable cash flows, interest coverage has weakened, constraining near-term financial flexibility [Doc 3].”
+2. **Content Expectations:**
+- Identify **3–6 major weaknesses** relevant to credit risk.
+- Focus on issues such as:
+- Declining profitability or margins
+- High leverage and weak coverage ratios
+- Revenue concentration
+- Operational or governance constraints
+- If numbers (such as revenue, market share, or margins) related to any weakness are mentioned, include them with context.
+- Always include source references in brackets (e.g., [Sustainability Report]) if mentioned. This can be the section name/title from the provided context.
 
-            2. **Content Expectations:**  
-            - Identify **3–6 major weaknesses** relevant to credit risk.  
-            - Focus on issues such as:  
-                - Declining profitability or margins  
-                - High leverage and weak coverage ratios  
-                - Revenue concentration  
-                - Operational or governance constraints  
-            - Always include source references in brackets (e.g., [Sustainability Report, p.42]) if mentioned.  
+3. **Formatting:**
+- Each weakness should begin with a **bold heading** followed by an analytical paragraph.
 
-            3. **Formatting:**  
-            - Each weakness should begin with a **bold heading** followed by an analytical paragraph.  
-
-            4. **Factual Integrity:**  
-            - Use only verified data from the input context.  
-            - Always include source references in brackets (e.g., [Sustainability Report, p.42]) if mentioned.
-            - Do not infer or fabricate information.
+4. **Factual Integrity:**
+- Use only verified data from the input context.
+- Always include source references in brackets (e.g., [Sustainability Report]) if mentioned. This can be the section name/title from the provided context.
+- Do not infer or fabricate information.
             
-            5. **Closing Summary:**  
-            - Summarize how these weaknesses may impact creditworthiness or risk stability.
+5. **Closing Summary:**
+- Summarize how these weaknesses may impact creditworthiness or risk stability.
 
-            6. **Analyst Rationale (3–5 bullets):**  
-            - End with bullet points summarizing the impact of these weaknesses on credit quality.
+6. **Analyst Rationale (3–5 bullets):**
+- End with bullet points summarizing the impact of these weaknesses on credit quality.
 
-            ### OUTPUT EXAMPLE:
-            **Weaknesses**
+### OUTPUT EXAMPLE:
+**Weaknesses**
 
-            1. **Elevated Leverage**  
-            Total borrowings increased to RM3.2 billion in 2024, reducing financial flexibility [Doc 3].
+1. **Weakness title**
+Reasoned analysis of the weakness with supporting data, numbers and context [References].
 
-            2. **Margin Compression**  
-            Profitability has declined due to input cost inflation and project delays [Annual Report, p.72].
+2. **Weakness title**
+Reasoned analysis of the weakness with supporting data, numbers and context [References].
 
-            **Analyst Rationale**  
-            • Elevated leverage and compressed margins constrain debt servicing ability.  
-            • Cash flow coverage remains pressured by higher borrowing costs.  
-            • Weaknesses are moderate but require monitoring to prevent credit deterioration.
+**Analyst Rationale**
+Opinions as an analyst on how these weaknesses impact credit quality.
 
-            If no weaknesses are identified, state: “The provided context does not detail specific weaknesses or vulnerabilities.”
-            """,
+Note: If no weaknesses are identified, state: “The provided context does not detail specific weaknesses or vulnerabilities.”""",
             "semantic_queries": [
                 {"query": "high debt leverage borrowings interest expense", "k": 5},
                 {"query": "declining revenue profit losses negative trends", "k": 4},
@@ -342,158 +356,145 @@ CREDIT_MEMO_SECTIONS = {
             "full_page": False
         },
         {
-            "user_query": """
-            You are a senior credit analyst. Using only the provided context, prepare a **professional narrative section** on the company’s **Key Opportunities** that could strengthen its credit profile.
+            "user_query": """/no_think You are a senior credit analyst. Using only the above provided context, prepare a **professional narrative section** on the company’s **Key Opportunities** that could strengthen its credit profile.
+### INSTRUCTIONS:
+1. **Style & Tone:**
+- Maintain a formal and analytical tone consistent with credit memoranda.
+- Avoid speculative statements; rely strictly on provided context.
+**Example:**
+“The company’s expansion into renewable energy projects worth x presents a significant growth avenue, enhancing revenue diversification and improving long-term cash flow stability [Management Discussion, p.33].”
 
-            ### INSTRUCTIONS:
-            1. **Style & Tone:**  
-            - Maintain a formal and analytical tone consistent with credit memoranda.  
-            - Avoid speculative statements; rely strictly on provided context.  
+Note: The above example is for illustrative purposes only. Do not copy it verbatim.
+            
+2. **Content Expectations:**
+- Identify **3–5 opportunities** likely to enhance credit strength.
+- Focus on initiatives such as:
+- Market or revenue diversification
+- Strategic investments or partnerships
+- Technological or operational improvements
+- Capital optimization and deleveraging initiatives
+- If numbers related to any opportunity are mentioned, include them with context.
+- Always include source references in brackets (e.g., [Sustainability Report]) if mentioned. This can be the section name/title from the provided context.
 
-            **Example:**  
-            “The company’s expansion into renewable energy projects worth RM1.2 billion by 2025 presents a significant growth avenue, enhancing revenue diversification and improving long-term cash flow stability [Management Discussion, p.33].”
+3. **Formatting:**
+- Each opportunity should start with a **bold heading** followed by an analytical paragraph.
 
-            2. **Content Expectations:**  
-            - Identify **3–5 opportunities** likely to enhance credit strength.  
-            - Focus on initiatives such as:  
-                - Market or revenue diversification  
-                - Strategic investments or partnerships  
-                - Technological or operational improvements  
-                - Capital optimization and deleveraging initiatives  
+4. **Factual Integrity:**
+- Use only verified data from the input context.
+- Always include source references in brackets (e.g., [Sustainability Report]) if mentioned. This can be the section name/title from the provided context.
+- Do not infer or fabricate information.
 
-            3. **Formatting:**  
-            - Each opportunity should start with a **bold heading** followed by an analytical paragraph.  
+5. **Closing Summary:**
+- Summarize how these opportunities can enhance the borrower’s credit resilience.
 
-            4. **Factual Integrity:**  
-            - Always include source references in brackets (e.g., [Sustainability Report, p.42]) if mentioned.  
+6. **Analyst Rationale (3–5 bullets):**
+- Conclude with an analytical rationale highlighting how opportunities may improve future credit quality.
 
-            5. **Closing Summary:**  
-            - Summarize how these opportunities can enhance the borrower’s credit resilience.
+### OUTPUT EXAMPLE:
+**Opportunities**
 
-            6. **Analyst Rationale (3–5 bullets):**  
-            - Conclude with an analytical rationale highlighting how opportunities may improve future credit quality.
+1. **Opportunity Title**
+Reasoned analysis of the opportunity with supporting data and context [References].
 
-            ### OUTPUT EXAMPLE:
-            **Opportunities**
+2. **Opportunity Title**
+Reasoned analysis of the opportunity with supporting data and context [References].
 
-            1. **Renewable Energy Expansion**  
-            Planned RM1.2 billion investment in renewable projects to diversify cash flow [Management Discussion, p.33].
+**Analyst Rationale**
+Opinions as an analyst on how these opportunities impact credit quality.
 
-            2. **Strategic Regional Growth**  
-            Expansion into ASEAN infrastructure markets to strengthen recurring income [Doc 4].
-
-            **Analyst Rationale**  
-            • Diversification and expansion initiatives enhance stability.  
-            • Technology-driven efficiencies may boost profitability.  
-            • Overall, these opportunities support a positive medium-term outlook.
-
-            If no opportunities are identified, state: “The provided context does not detail specific growth opportunities or strategic initiatives.”
-            """,
+Note: If no opportunities are identified, state: “The provided context does not detail specific growth opportunities or strategic initiatives.” Do not invent opportunities beyond what is explicitly described in the context.""",
             "semantic_queries": [
                 {"query": "future projects pipeline order book contracts", "k": 4},
-                {"query": "diversification new products services segments", "k": 3}
+                {"query": "diversification new products services segments", "k": 3},
+                {"query": "strategic investments partnerships collaborations", "k": 3},
+                {"query": "targets, vision, goals", "k": 2},
             ],
             "full_page": False
         },
         {
-            "user_query": """
-            You are a senior credit analyst. Using only the provided context, prepare a **professional narrative section** summarizing the company’s **Key Risks and Mitigation Strategies** relevant to its credit profile.
+            "user_query": """/no_think You are a senior credit analyst. Using only the above provided context, prepare a **professional narrative section** summarizing the company’s **Key Risks and Mitigation Strategies** relevant to its credit profile.
+### INSTRUCTIONS:
+1. **Style & Tone:**
+- Write in a formal, analytical, and concise tone consistent with professional credit memos.
+- Avoid vague or generic statements—each risk should be specific and directly supported by contextual evidence.
+- Do not invent risks or mitigants beyond what is explicitly described in the context.
 
-            ### INSTRUCTIONS:
-            1. **Style & Tone:**  
-            - Write in a formal, analytical, and concise tone consistent with professional credit memos.  
-            - Avoid vague or generic statements—each risk should be specific and directly supported by contextual evidence.  
-            - Do not invent risks or mitigants beyond what is explicitly described in the context.
+2. **Content Expectations:**
+- Identify **3–6 major risks** disclosed or evident from the provided information.
+- If more than six risks are found, prioritize those most relevant to credit assessment and at the end mention "Other risks mentioned but not detailed here include [list any additional risks briefly]."
+- For each major risk, provide:
+- A clear **Risk Title** summarizing the risk.
+- A brief analytical **description** explaining its relevance and potential impact on creditworthiness.
+- A **Mitigation** section detailing the strategies or actions taken by company to address the risk.
+- If multiple strategies or actions exist, list them as bullet points for clarity.
+- Focus on risks most relevant to credit assessment, such as: Financial risks (liquidity, leverage, foreign exchange exposure), Operational risks (supply chain, project execution, cost overruns), Strategic risks (market competition, regulatory change, governance), Environmental, social, or climate-related risks (ESG compliance, carbon exposure).
 
-            2. **Content Expectations:**  
-            - Identify **3–6 major risks** disclosed or evident from the provided information.  
-            - For each risk, provide:
-                - A clear **Risk Title** summarizing the nature of the risk.  
-                - A brief analytical **description** explaining its relevance and potential impact on creditworthiness.  
-                - A **Mitigation** section detailing the company’s strategies or actions to address the risk.  
-                - If multiple actions exist, list them as bullet points for clarity.  
-            - Focus on risks most relevant to credit assessment, such as:
-                - Financial risks (liquidity, leverage, foreign exchange exposure)
-                - Operational risks (supply chain, project execution, cost overruns)
-                - Strategic risks (market competition, regulatory change, governance)
-                - Environmental, social, or climate-related risks (ESG compliance, carbon exposure)
+3. **Formatting:**
+- Present each risk in the following structured format:
+**Risk Title**
+A concise paragraph describing the risk, its nature, cause, or implications of the risk.
+*Mitigant(s):*
+List of mitigation strategies or actions taken by the company.
 
-            3. **Formatting:**
-            - Present each risk in the following structured format:
-                **Risk Title**  
-                *Description:* concise paragraph describing the nature, cause, or implications of the risk.  
-                *Mitigant(s):*  
-                • Bullet 1 (if applicable)  
-                • Bullet 2 (if applicable)  
-                • Bullet 3 (if applicable)
+4. **Factual Integrity:**
+- Use only facts, figures, or quotes available in the input context.
+- Always include source references in brackets (e.g., [Sustainability Report, p.42]) if mentioned.
+- If a risk is mentioned without an explicit mitigation, state: “No specific mitigation disclosed.”
 
-            4. **Factual Integrity:**
-            - Use only facts, figures, or quotes available in the input context.  
-            - Always include source references in brackets (e.g., [Sustainability Report, p.42]) if mentioned.  
-            - If a risk is mentioned without an explicit mitigation, state: “No specific mitigation disclosed.”
+5. **Closing Summary:**
+- End with a short analytical paragraph summarizing the overall effectiveness of the company’s risk management framework, highlighting whether mitigations appear adequate and proactive.
 
-            5. **Closing Summary:**
-            - End with a short analytical paragraph summarizing the overall effectiveness of the company’s risk management framework, highlighting whether mitigations appear adequate and proactive.
+6. **Analyst Rationale (3–5 bullets):**
+- After the main section, include a concise “Analyst Rationale” summarizing the overall strength or weakness of the company’s risk management approach.
 
-            6. **Analyst Rationale (3–5 bullets):**
-            - After the main section, include a concise “Analyst Rationale” summarizing the overall strength or weakness of the company’s risk management approach.
+### OUTPUT EXAMPLE:
+**Risks and Mitigation Strategies**
 
-            ### OUTPUT EXAMPLE:
+1. **Risk Title**
+Explanation and reasoning of the risk and its implications.
+*Mitigant(s):*
+List of mitigation strategies or actions taken by the company.
 
-            **Foreign Exchange Risk**  
-            *Description:* The company is exposed to currency fluctuations arising from its overseas operations, particularly in Singapore and Australia. Volatility in exchange rates may impact earnings translation and cash flows [Annual Report, p.65].  
-            *Mitigant(s):*  
-            • Maintains natural hedging through matching of foreign currency revenues and expenses.  
-            • Uses forward contracts selectively to manage significant exposures.  
-            • Monitors FX movements through centralized treasury oversight.
+2. **Risk Title**
+Explanation and reasoning of the risk and its implications.
+*Mitigant(s):*
+List of mitigation strategies or actions taken by the company.
 
-            **Project Execution Risk**  
-            *Description:* Large-scale infrastructure projects carry risks of cost overruns and delays that may affect margins and cash flows [Doc 2].  
-            *Mitigant(s):*  
-            • Employs stringent project governance and stage-gate approval processes.  
-            • Engages experienced contractors and adopts digital project tracking systems.  
-            • Maintains contingency buffers in project budgeting.
+**Analyst Rationale**
+Opinions as an analyst on how these risks and mitigants impact credit quality.
 
-            **Analyst Rationale**  
-            • The company demonstrates proactive risk governance and effective financial risk hedging mechanisms.  
-            • Operational controls and project oversight frameworks reduce execution and compliance risk.  
-            • Overall, risk management practices appear robust and aligned with industry best standards, supporting a stable credit profile.
-
-            If no clear risks are mentioned, state: "The provided context does not detail specific identified risks."
-            """,
+Note: If no clear risks are mentioned, state: "The provided context does not detail specific identified risks." Do not fabricate risks or mitigants.""",
             "semantic_queries": [
                 {"query": "managing risks principal risks risk factors risk drivers mitigants", "k": 5},
-                # {"query": "operational risks supply chain project execution cost overruns", "k": 1},
-                # {"query": "strategic risks market competition regulatory change governance", "k": 3},
-                # {"query": "environmental social climate risks", "k": 2},
-                # {"query": "risk management framework policies procedures oversight", "k": 2}
+                {"query": "operational risks supply chain project execution cost overruns", "k": 3},
+                {"query": "strategic risks market competition regulatory change governance", "k": 3},
+                {"query": "environmental social climate risks", "k": 3},
+                {"query": "risk management framework policies procedures oversight", "k": 4}
             ],
             "full_page": False
         },
         {
-            "user_query": """
-            Based on all the information analyzed in this Risk Assessment section, provide a comprehensive **Credit Implications** analysis.
+            "user_query": """Based on all the information analyzed in this Risk Assessment section and above context, provide a comprehensive **Credit Implications** analysis.
+### STRUCTURE:
+**Credit Implications**
+1. **Overall Risk Profile Summary (1 paragraph)**
+Provide a synthesis of findings from risk ratings, SWOT, and risks & mitigants.
 
-            ### STRUCTURE:
-            1. **Overall Risk Profile Summary (1 paragraph)**  
-            Provide a synthesis of findings from risk ratings, SWOT, and risks & mitigants.
+2. **Key Credit Considerations (4–6 bullet points)**
+• Major strengths supporting credit quality.
+• Key weaknesses and risks.
+• Mitigating factors and credit stabilizers.
 
-            2. **Key Credit Considerations (4–6 bullet points)**  
-            • Major strengths supporting credit quality.  
-            • Key weaknesses and risks.  
-            • Mitigating factors and credit stabilizers.
+3. **Credit Outlook Assessment (1 paragraph)**
+Offer a forward-looking perspective: improving, stable, or deteriorating outlook.
 
-            3. **Credit Outlook Assessment (1 paragraph)**  
-            Offer a forward-looking perspective: improving, stable, or deteriorating outlook.
+4. **Analyst Recommendations (3–5 bullets)**
+• Suggested credit classification.
+• Metrics or covenants to monitor.
+• Review frequency and key watchpoints.
 
-            4. **Analyst Recommendations (3–5 bullets)**  
-            • Suggested credit classification.  
-            • Metrics or covenants to monitor.  
-            • Review frequency and key watchpoints.
-
-            **Tone:** Balanced, professional, analytical. 
-            **Do not introduce new facts.**
-            """,
+**Tone:** Balanced, professional, analytical. 
+**Do not introduce new facts.** Base all analysis strictly on the provided context.""",
             "semantic_queries": [
                 {"query": "management outlook future prospects guidance", "k": 4},
                 {"query": "strategy priorities objectives targets", "k": 4},
@@ -505,69 +506,60 @@ CREDIT_MEMO_SECTIONS = {
     ],
     "Loan Structure and Terms": [
         {
-            "user_query": """
-            You are a senior credit analyst. Using only the provided context, prepare a **professional narrative section** summarizing the company’s **Loan Structure and Terms** relevant to the credit proposal.
+            "user_query": """/no_think You are a senior credit analyst. Using only the above provided context, prepare a **professional narrative section** summarizing the company’s **Loan Structure and Terms** relevant to the credit proposal.
+### INSTRUCTIONS:
+1. **Style & Tone:**
+- Write in a formal, analytical, and concise tone consistent with professional credit memos.
+- Use clear subheadings and maintain consistent formatting with other memo sections.
+- Do not fabricate or infer details beyond what is explicitly available in the context.
 
-            ### INSTRUCTIONS:
-            1. **Style & Tone:**  
-            - Write in a formal, analytical, and concise tone consistent with professional credit memos.  
-            - Use clear subheadings and maintain consistent formatting with other memo sections.  
-            - Do not fabricate or infer details beyond what is explicitly available in the context.  
+2. **Content Expectations:**
+- Present a structured summary that covers all key components of the proposed financing arrangement:
+- **Loan Amount**
+- **Interest Rate**
+- **Tenor / Maturity**
+- **Repayment Terms**
+- **Covenants**
+- **Fees / Charges** (if disclosed)
+- **Purpose of Funds** (briefly explain intended use)
+- **Sources and Uses of Funds Table:**
+Present in a structured, readable format different sources of funds and their amounts if available
+- **Uses of Funds**
+Present in a structured, readable format different uses of funds and their amounts if available
 
-            2. **Content Expectations:**  
-            - Present a structured summary that covers all key components of the proposed financing arrangement:  
-                - **Loan Amount**   
-                - **Interest Rate**
-                - **Tenor / Maturity** 
-                - **Repayment Terms** 
-                - **Covenants** 
-                - **Fees / Charges** (if disclosed)  
-                - **Purpose of Funds** (briefly explain intended use)  
-                - **Sources and Uses of Funds Table:**  
-                    Present in a structured, readable format different sources of funds and their amounts if available
-                - **Uses of Funds**  
-                    Present in a structured, readable format different uses of funds and their amounts if available
-                    
+3. **Formatting:**
+- Use bold section headers such as **Loan Amount**, **Interest Rate**, **Repayment Terms**, etc.
+- Use bullet points or short structured lines for clarity where applicable.
+- Use tabular structure where appropriate.
 
-            3. **Formatting:**
-            - Use bold section headers such as **Loan Amount**, **Interest Rate**, **Repayment Terms**, etc.  
-            - Use bullet points or short structured lines for clarity where applicable.
-            - Use tabular structure where appropriate.
+4. **Factual Integrity:**  
+- Cite all figures and data exactly as they appear.
+- Do not add assumptions or rephrase quantitative details.
+- If certain details (e.g., covenants or fees) are missing, explicitly state: “No information on [covenants/fees/etc.] is disclosed in the provided context.”
 
-            4. **Factual Integrity:**  
-            - Cite all figures and data exactly as they appear.  
-            - Do not add assumptions or rephrase quantitative details.  
-            - If certain details (e.g., covenants or fees) are missing, explicitly state:  
-            “No information on [covenants/fees/etc.] is disclosed in the provided context.”
+5. **Closing Summary:**
+- End with a concise analytical paragraph summarizing:
+- How well the loan structure aligns with the borrower’s funding needs and repayment capacity.
+- Whether the structure is consistent with the bank’s policy and prudent credit practice.
 
-            5. **Closing Summary:**  
-            - End with a concise analytical paragraph summarizing:  
-            - How well the loan structure aligns with the borrower’s funding needs and repayment capacity.  
-            - Whether the structure is consistent with the bank’s policy and prudent credit practice.
+### OUTPUT EXAMPLE:
+**Loan Amount:**
+**Interest Rate:**
+**Tenor:**
+**Repayment Terms:**
+**Covenants:**
+**Fees:**
+**Purpose of Funds:**
+**Sources of Funds**
+What are the sources of funds for the loan?
 
-            ### OUTPUT EXAMPLE:
-            **Loan Amount:** RM 7,500,000  
-            **Interest Rate:** 10% p.a. (fixed)  
-            **Tenor:** 10 years  
-            **Repayment Terms:** Equal annual installments of principal and interest.  
-            **Covenants:** Debt/EBITDA < 3x; Minimum DSCR 1.2x.  
-            **Fees:** 0.5% processing fee.  
-            **Purpose of Funds:** To finance the construction of a new plant, acquisition of a competitor, and working capital buffer [Credit Proposal, p.15].
+**Uses of Funds**
+What are the uses of funds for the loan?
 
-            **Sources of Funds**  
-            What are the sources of funds for the loan?
-            
+**Summary:**
+Summarize
 
-            **Uses of Funds**  
-            What are the uses of funds for the loan?
-
-            **Summary:**  
-            Summarize
-
-            If no loan terms are disclosed, state:  
-            "The provided context does not contain details regarding loan amount, structure, or repayment terms."
-
-            """,
+Note: If no loan terms are disclosed, state: ”The provided context does not contain details regarding loan amount, structure, or repayment terms.”""",
             "semantic_queries": [
                 {"query": "Proposed loan amount, structure, and purpose of funds", "k": 2, "filter": "loan"},
                 {"query": "Loan amount, interest rate, tenor, and repayment schedule", "k": 2, "filter": "loan"},
@@ -575,7 +567,7 @@ CREDIT_MEMO_SECTIONS = {
                 {"query": "Sources and uses of funds breakdown", "k": 2, "filter": "loan"},
                 {"query": "Any applicable fees, charges, or facility costs", "k": 2, "filter": "loan"}
             ],
-            "full_page": True
+            "full_page": False
         }
     ]
 

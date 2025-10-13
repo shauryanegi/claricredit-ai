@@ -22,16 +22,17 @@ def main(pdf_name: str, n_results: int = 5):
     # Adjust filename as needed; you could also make this an argument.
     pdf_file = os.path.join(config.PDF_DIR, pdf_name)
     md_file = extractor.extract_pdf(pdf_file)
+    file_name = pdf_name.replace(".pdf","")
 
     # Step 2: Chunk + embeddings
-    processor = chunker.MarkdownChunker(output_dir=config.OUTPUT_DIR)
+    processor = chunker.MarkdownChunker(file_name,output_dir=config.OUTPUT_DIR)
     chunks, embeddings = processor.create_embeddings_and_index(md_file)
     print(f"[INFO] Processed {len(chunks)} chunks.")
 
     # Step 3: Initialize RAG pipeline
     rag = RAGPipelineCosine(
         chroma_path=config.CHROMA_PATH,
-        collection_name="markdown_chunks",
+        collection_name=f"markdown_chunks_{file_name}",
         llm_endpoint=config.LLM_ENDPOINT,
         llm_model=config.LLM_MODEL
     )

@@ -2,7 +2,7 @@ import chromadb
 from typing import List
 from resources.embeddings import get_embedding
 from resources.llm_adapter import LocalLLMAdapter
-from resources.config.system_prompt import SYSTEM_PROMPT
+from resources.config.system_prompt import SYSTEM_PROMPT,ADDITIONAL_INSTRUCTIONS
 from collections import OrderedDict
 import json
 
@@ -35,7 +35,7 @@ class RAGPipelineCosine:
         messages = [
             {"role": "system", "content": SYSTEM_PROMPT},
             # {"role": "user", "content": f"Question: {query}\n\nContext:\n{context}\n\nAnswer:"}
-            {"role": "user", "content": f"{query}\n\nContext:\n{context}"}
+            {"role": "user", "content": f"Context:\n{context}\n\n{query}\n{ADDITIONAL_INSTRUCTIONS}"}
         ]
         return self.llm.chat(messages, max_tokens=512)
 
@@ -79,8 +79,4 @@ class RAGPipelineCosine:
 
             all_docs = list(OrderedDict.fromkeys([doc for doc, meta in retrieved_docs_with_meta]))
 
-
-        # print("\n=== Retrieved Docs Preview ===")
-        # for d in all_docs:
-        #     print(d[:300].replace("\n", " ") + " ...")
         return self.generate_answer(user_query, all_docs)

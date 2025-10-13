@@ -27,14 +27,14 @@ def get_embedding(text: str) -> List[float]:
 # Markdown Chunker
 # -------------------------------
 class MarkdownChunker:
-    def __init__(self, output_dir: str = config.OUTPUT_DIR):
+    def __init__(self, file_name:str, output_dir: str = config.OUTPUT_DIR):
         self.output_dir = output_dir
         os.makedirs(output_dir, exist_ok=True)
         
         # Initialize ChromaDB
         self.chroma_client = chromadb.PersistentClient(path=config.CHROMA_PATH)
         self.collection = self.chroma_client.get_or_create_collection(
-            name="markdown_chunks", 
+            name=f"markdown_chunks_{file_name}", 
             metadata={"hnsw:space": "cosine"}
         )
         self.chunks = []

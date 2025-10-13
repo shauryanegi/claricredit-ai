@@ -43,7 +43,7 @@ CREDIT_MEMO_SECTIONS = {
         "semantic_queries": [                
             {"query": "About us, what we do, our history", "k": 3},
         ],
-            "full_page": True
+            "full_page": True, "include_for_summary":True
         },
         {
         "user_query": 
@@ -124,7 +124,8 @@ CREDIT_MEMO_SECTIONS = {
             "semantic_queries": [
                 {"query": "current ratio, quick ratio, total assets liabilities", "k": 2},
             ],
-            "full_page": True
+            "full_page": True, 
+            "include_for_summary":True
             },
             {
             "user_query": """
@@ -238,7 +239,8 @@ Details about the risk ratings found in the provided document (if any).
                 {"query": "Details of risk rating", "k": 2},
                 {"query": "Details of external credit assessment and internal risk evaluation", "k": 3}
             ],
-            "full_page": False
+            "full_page": False, 
+            "include_for_summary":True
         },
         {
             "user_query": """/no_think You are a senior credit analyst. Using only the  above provided context, prepare a **professional narrative section** on the company’s **Key Strengths** relevant to a credit assessment.
@@ -297,7 +299,8 @@ Note:If no strengths are identified, state: “The provided context does not det
                 {"query": "Market position, diversification, recurring income, or growth prospects", "k": 5},
                 {"query": "Technological innovation, operational excellence, or brand leadership", "k": 5}
             ],
-            "full_page":False
+            "full_page":False, 
+            "include_for_summary":True
         },
         {
             "user_query": """/no_think You are a senior credit analyst. Using only the above provided context, prepare a **professional narrative section** on the company’s **Key Weaknesses** relevant to a credit assessment.
@@ -353,7 +356,8 @@ Note: If no weaknesses are identified, state: “The provided context does not d
                 {"query": "liquidity constraints cash flow problems working capital", "k": 4},
                 {"query": "competition pressure market challenges industry headwinds", "k": 3},
             ],
-            "full_page": False
+            "full_page": False,
+            "include_for_summary":True
         },
         {
             "user_query": """/no_think You are a senior credit analyst. Using only the above provided context, prepare a **professional narrative section** on the company’s **Key Opportunities** that could strengthen its credit profile.
@@ -567,8 +571,28 @@ Note: If no loan terms are disclosed, state: ”The provided context does not co
                 {"query": "Sources and uses of funds breakdown", "k": 2, "filter": "loan"},
                 {"query": "Any applicable fees, charges, or facility costs", "k": 2, "filter": "loan"}
             ],
-            "full_page": False
+            "full_page": False,
+            "include_for_summary":True
         }
-    ]
+    ],
+    "Executive Summary":[
+        {
+        "user_query": """
+        Generate a 1 page long Executive Summary section of the credit memo.
+        You don't have to analyse aything, you just have to extract the following information from the context.
+
+        Content to include (if available in context, Skip if not present):
+        1. Borrower/Company name (Which company is being refeerred to?)
+        2. Loan amount and purpose  
+        3. Key financial metrics 
+        4. Repayment information
+        5. Summary of key risks and strengths  
+        6. Proposed risk rating  
+        7. Final recommendation (approve or decline)
+        """
+        ,
+    }
+    ]    
+
 
 }

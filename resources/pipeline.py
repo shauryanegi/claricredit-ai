@@ -9,13 +9,7 @@ from resources.retrieval_queries.sections import CREDIT_MEMO_SECTIONS
 import time
 
 
-def load_prompts(file_path: str) -> dict:
-    """Load YAML prompts as a dictionary of {section: prompt_text}."""
-    with open(file_path, "r", encoding="utf-8") as f:
-        return yaml.safe_load(f)
-
-
-def main(pdf_name: str, n_results: int = 5):
+def main(pdf_name: str):
     print("[INFO] Starting Credit Memo Pipeline...")
     start = time.time()
     # Step 1: Extract PDF → Markdown
@@ -37,20 +31,66 @@ def main(pdf_name: str, n_results: int = 5):
         llm_model=config.LLM_MODEL
     )
 
-    # Step 4: Load prompts
-    prompts_file = os.path.join("resources", "prompts", "credit_memo_prompts.yaml")
-    prompts = load_prompts(prompts_file)
-
     results = {}
     split_page_file = split_md_by_page(md_file)
+    summary_context=[]
     for section, groups in CREDIT_MEMO_SECTIONS.items():
         section_start = time.time()
         print(f"Making section:{section}")
         section_results = []
         for group in groups:
-            answer = rag.run(group, split_page_file)
+            if section=="Executive Summary":
+                summary_context.append("""Recommendation
+Approval with Conditions
+Rationale: The loan approval is supported by company’s strong liquidity (current ratio of
+2.1) and its moderate risk rating (4). The Debt-to-EBITDA ratio of 1.5 is acceptable for
+infrastructure projects, though it is slightly elevated. A Loan-to-Value (LTV) of 65% reduces
+the risk of equity dilution.
+Conditions:
+• Debt Covenants: The borrower is to maintain a debt-to-EBITDA ratio below 1.2x to
+mitigate leverage risk.
+• Use of Funds: Loan proceeds are to be strictly used for the approved capital expenditure
+and acquisition, with compliance verified by third-party audits.
+• Regular Monitoring: Quarterly financial reporting and stress tests are required to
+assess liquidity under adverse scenarios.
+• Interest Rate: The proposed 10% rate is competitive, but the borrower may be in a
+position to negotiate a slightly lower rate given their strong liquidity.""")
+                summary_context.append("""Loan Request and Proposed Structure
+Sources and Uses of Funds
+Sources of Funds
+Proposed Term Loan: RM 7,500,000
+Internal Accruals: RM 2,500,000
+Total Sources: RM 10,000,000
+Uses of Funds
+New Plant Construction: RM 4,000,000
+Acquisition of Competitor: RM 5,000,000
+Working Capital Buffer: RM 1,000,000
+Total Uses: RM 10,000,000
+Proposed Loan Facility
+Loan Amount: RM 7,500,000
+Interest Rate: 10% p.a. (fixed)
+Loan Term: 10 years
+Repayment Schedule: Equal annual installments of principal and interest
+Purpose of Funds
+The funds will be utilized for capital expenditure related to the construction of a new plant, the strategic acquisition of a key competitor, and to maintain an adequate working capital buffer.
+6. Collateral Analysis
+Assets Pledged
+Existing Plant & Machinery – Appraised Value: RM 6,000,000
+Land Parcel (Industrial) – Appraised Value: RM 5,000,000
+Accounts Receivable – Appraised Value: RM 2,000,000
+Collateral Adequacy
+Total Appraised Value: RM 13,000,000
+Loan Amount: RM 7,500,000
+Calculated Loan-to-Value (LTV) Ratio: ~65%""")
+                user_query=group["user_query"]
+                answer = rag.generate_answer(user_query,summary_context)
+            else:
+                answer = rag.run(group,split_page_file)
+                if group.get("include_for_summary"):
+                    print(f"part of {section} included in summary")
+                    summary_context.append(answer)
             section_results.append(answer)
-        section_text = "\n\n".join(section_results)
+        section_text="\n\n".join(section_results)
         results[section] = section_text
         section_end = time.time()
         print(f"[INFO] Section '{section}' completed in {section_end - section_start:.2f} seconds.")
@@ -70,7 +110,6 @@ def main(pdf_name: str, n_results: int = 5):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Credit Memo Generator")
     parser.add_argument("--pdf", type=str, help="Name of the PDF file in the files directory", required=True)
-    parser.add_argument("--n_results", type=int, default=5, help="Number of retrieved docs per query")
     args = parser.parse_args()
 
-    main(pdf_name=args.pdf, n_results=args.n_results)
+    main(pdf_name=args.pdf)

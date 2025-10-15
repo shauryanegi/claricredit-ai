@@ -28,8 +28,17 @@ class LocalLLMAdapter:
                 first_line = resp_text.splitlines()[0]
                 return json.loads(first_line)
 
-        resp = requests.post(self.endpoint, json=payload, timeout=self.timeout)
-        data = safe_json_parse(resp.text)
+        try:
+            resp = requests.post(self.endpoint, json=payload, timeout=self.timeout)
+            data = safe_json_parse(resp.text)
+        except Exception as e:
+            print(f"First attempt failed: {e}")
+            try:
+                resp = requests.post(self.endpoint, json=payload, timeout=self.timeout)
+                data = safe_json_parse(resp.text)
+            except Exception as e2:
+                print(f"Second attempt failed: {e2}")
+                return ""
 
         if "choices" in data:
             return data["choices"][0]["message"]["content"]

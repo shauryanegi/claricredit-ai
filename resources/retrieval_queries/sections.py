@@ -6,7 +6,7 @@ CREDIT_MEMO_SECTIONS = {
     "Borrower, Management, and Ownership": [
         {
         "user_query": 
-        f"""Write about the-
+        f"""/no_think Write about the-
         - Board of directors/names of directors or management team
         Only use relevant information from the context to generate the report as some part of the context could be irrelevant.
         Do not include anything that is not present in the context
@@ -20,7 +20,7 @@ CREDIT_MEMO_SECTIONS = {
         },
         {
         "user_query": 
-        f"""Write about the-
+        f"""/no_think Write about the-
         - Relationship with {bank_name} (e.g., prior loans, payment history).
         Only use relevant information from the context to generate the report as some part of the context could be irrelevant.
         Do not include anything that is not present in the context
@@ -34,7 +34,7 @@ CREDIT_MEMO_SECTIONS = {
         },
         {
         "user_query": 
-        f"""Write regarding-
+        f"""/no_think Write regarding-
         - About the company
         - What the company does
         - Overview of the industry
@@ -48,7 +48,7 @@ CREDIT_MEMO_SECTIONS = {
         },
         {
         "user_query": 
-        """Write about the-
+        """/no_think Write about the-
         - Percentage shares of the directors
         - any information about shareholders
         Only use relevant information from the context to generate the report as some part of the context could be irrelevant.

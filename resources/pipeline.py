@@ -7,9 +7,9 @@ from resources.rag import RAGPipelineCosine
 from resources.split_md_by_page import split_md_by_page
 from resources.retrieval_queries.sections import CREDIT_MEMO_SECTIONS
 import time
+import asyncio
 
-
-def main(pdf_name: str):
+async def main(pdf_name: str):
     print("[INFO] Starting Credit Memo Pipeline...")
     start = time.time()
     # Step 1: Extract PDF → Markdown
@@ -20,7 +20,7 @@ def main(pdf_name: str):
 
     # Step 2: Chunk + embeddings
     processor = chunker.MarkdownChunker(file_name,output_dir=config.OUTPUT_DIR)
-    chunks, embeddings = processor.create_embeddings_and_index(md_file)
+    chunks, embeddings = await processor.create_embeddings_and_index_async(md_file)
     print(f"[INFO] Processed {len(chunks)} chunks.")
 
     # Step 3: Initialize RAG pipeline
@@ -104,4 +104,4 @@ if __name__ == "__main__":
     parser.add_argument("--pdf", type=str, help="Name of the PDF file in the files directory", required=True)
     args = parser.parse_args()
 
-    main(pdf_name=args.pdf)
+    asyncio.run(main(pdf_name=args.pdf))

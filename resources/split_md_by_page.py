@@ -1,6 +1,7 @@
 import re
 import json
 import os
+import logging
 
 def split_md_by_page(md_file):
     """
@@ -43,7 +44,7 @@ def split_md_by_page(md_file):
     with open(output_file, "w", encoding="utf-8") as f:
         json.dump(page_contents, f, ensure_ascii=False, indent=2)
 
-    print(f"Saved: {output_file}")
+    logging.info(f"Saved: {output_file}")
     return output_file
 
     # Save to file

@@ -1,4 +1,5 @@
 import chromadb
+import logging
 from typing import List
 from resources.embeddings import get_embedding
 from resources.llm_adapter import LocalLLMAdapter
@@ -52,13 +53,13 @@ class RAGPipelineCosine:
                 filter=dictionary.get("filter")
                 docs_with_meta = self.retrieve(query, n_results=n_results,filter=filter)
                 for doc, meta in docs_with_meta:
-                    # print(meta) 
+                    # logging.debug(meta) 
                     # key=(meta['page'],meta['length'])
                     page=meta['page']
-                    print("Choosing full page-",page)
+                    logging.info(f"Choosing full page- {page}")
                     if meta["type"]=="loan":
                         all_docs.append(doc)
-                        # print("doc=",doc)
+                        # logging.debug(f"doc={doc}")
                     
                     elif page not in seen:   # deduplicate based on page
                         seen.add(page)
@@ -67,7 +68,7 @@ class RAGPipelineCosine:
                             full_pages = json.load(f)
                         all_docs.append(full_pages[page-1])
                     # else:
-                        # print(f"Page {page} repeated")
+                        # logging.debug(f"Page {page} repeated")
         else:
             retrieved_docs_with_meta = []
             for sem_q in semantic_queries:

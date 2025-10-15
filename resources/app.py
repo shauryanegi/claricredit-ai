@@ -39,7 +39,9 @@ async def index_markdown(md_file: UploadFile):
 @app.post("/query")
 async def query_pipeline(query: str = Form(...), n_results: int = Form(5)):
     """Run a single ad-hoc query against the indexed Markdown."""
-    answer = rag.run(query, n_results=n_results)
+    docs_with_meta = rag.retrieve(query, n_results=n_results)
+    context_docs = [doc for doc, meta in docs_with_meta]
+    answer = rag.generate_answer(query, context_docs)
     return {"query": query, "answer": answer}
 
 @app.post("/memo")
@@ -50,7 +52,9 @@ async def generate_credit_memo(n_results: int = Form(5)):
 
     results = {}
     for section, prompt in prompts.items():
-        answer = rag.run(prompt, n_results=n_results)
+        docs_with_meta = rag.retrieve(prompt, n_results=n_results)
+        context_docs = [doc for doc, meta in docs_with_meta]
+        answer = rag.generate_answer(prompt, context_docs)
         results[section] = {"question": prompt, "answer": answer}
 
     return {"memo": results}

@@ -2,12 +2,30 @@ import os
 import re
 import json
 import asyncio
+import logging
 from datetime import datetime
 from typing import List, Dict, Any
 import numpy as np
 import httpx
 import chromadb
 from resources.config import config
+
+# -------------------------------
+# Sync embedding function
+# -------------------------------
+def get_embedding(text: str) -> List[float]:
+    """Get embedding for a single text using Ollama"""
+    url = f"{config.EMBEDDING_BASE_URL}/api/embeddings"
+    payload = {"model": config.EMBEDDING_MODEL, "prompt": text}
+    try:
+        # Using httpx for consistency, but sync
+        with httpx.Client(timeout=60) as client:
+            response = client.post(url, json=payload)
+            response.raise_for_status()
+            return response.json()["embedding"]
+    except Exception as e:
+        logging.error(f"Error getting embedding: {e}")
+        return [0.0] * 768  # fallback
 
 # -------------------------------
 # Async embedding function
@@ -30,7 +48,7 @@ async def get_embedding_async(text: str) -> List[float]:
         resp.raise_for_status()
         return resp.json().get("embedding", [0.0] * 768)
     except Exception as e:
-        print(f"Error getting embedding: {e}")
+        logging.error(f"Error getting async embedding: {e}")
         return [0.0] * 768
  
 # -------------------------------
@@ -48,7 +66,6 @@ class MarkdownChunker:
         )
         self.chunks: List[Dict[str, Any]] = []
  
-    # --- same as before ---
     def extract_chunks_from_markdown(self, md_content: str) -> List[Dict[str, Any]]:
         chunks = []
         page_pattern = r"\{(\d+)\}-+"
@@ -86,7 +103,7 @@ class MarkdownChunker:
         return chunks
  
     def clean_marker_md(self, raw_text: str, remove_images: bool = False) -> str:
-        text = raw_text.replace("\\n", "")
+        text = raw_text.replace("\n", "")
         text = re.sub(r'<[^>]+>', '', text)
         text = re.sub(r'<IR>', '', text)
         text = re.sub(r'(#+)\s*\*\*(.*?)\*\*', r'\1 \2', text)
@@ -94,18 +111,33 @@ class MarkdownChunker:
             text = re.sub(r'!\[.*?\]\(.*?\)', '', text)
         text = re.sub(r'\n{3,}', '\n\n', text)
         return text.strip()
- 
-    # -------------------------------
-    # Async embedding + indexing
-    # -------------------------------
-    async def create_embeddings_and_index_async(self, md_file_path: str):
-        print(f"Processing: {md_file_path}")
+
+    def create_embeddings_and_index(self, md_file_path: str):
+        logging.info(f"Processing: {md_file_path}")
         with open(md_file_path, 'r', encoding='utf-8') as f:
             md_content = f.read()
         md_content = self.clean_marker_md(md_content)
         
         chunks = self.extract_chunks_from_markdown(md_content)
-        print(f"Extracted {len(chunks)} chunks")
+        logging.info(f"Extracted {len(chunks)} chunks")
+        
+        embeddings = [get_embedding(c['content']) for c in chunks]
+        embeddings = np.array(embeddings)
+        
+        self.save_embeddings(embeddings, chunks, md_file_path)
+        self.store_in_chromadb(chunks, embeddings)
+        
+        self.chunks = chunks
+        return chunks, embeddings
+ 
+    async def create_embeddings_and_index_async(self, md_file_path: str):
+        logging.info(f"Processing async: {md_file_path}")
+        with open(md_file_path, 'r', encoding='utf-8') as f:
+            md_content = f.read()
+        md_content = self.clean_marker_md(md_content)
+        
+        chunks = self.extract_chunks_from_markdown(md_content)
+        logging.info(f"Extracted {len(chunks)} chunks")
  
         # Compute embeddings concurrently
         embeddings = await asyncio.gather(*(get_embedding_async(c['content']) for c in chunks))
@@ -117,7 +149,6 @@ class MarkdownChunker:
         self.chunks = chunks
         return chunks, embeddings
  
-    # --- same save/store/search methods as before ---
     def save_embeddings(self, embeddings: np.ndarray, chunks: List[Dict], source_file: str):
         embed_file = os.path.join(self.output_dir, "embeddings.npy")
         np.save(embed_file, embeddings)
@@ -176,15 +207,13 @@ class MarkdownChunker:
         )
         return results
  
-# -------------------------------
-# Main
-# -------------------------------
 async def main():
+    logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
     md_file = f"{config.OUTPUT_DIR}/Gamuda.md"
     processor = MarkdownChunker(output_dir=config.OUTPUT_DIR)
     chunks, embeddings = await processor.create_embeddings_and_index_async(md_file)
     results = await processor.search_async("financial data", n_results=3)
-    print(results)
+    logging.info(results)
  
 if __name__ == "__main__":
     asyncio.run(main())

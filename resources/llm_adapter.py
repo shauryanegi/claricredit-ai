@@ -23,7 +23,8 @@ class LocalLLMAdapter:
         def safe_json_parse(resp_text: str):
             try:
                 return json.loads(resp_text)
-            except json.JSONDecodeError:
+            except json.JSONDecodeError as e:
+                print(f"JSONDecodeError: {e}")
                 first_line = resp_text.splitlines()[0]
                 return json.loads(first_line)
 

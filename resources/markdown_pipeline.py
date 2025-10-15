@@ -8,20 +8,20 @@ from resources.rag import RAGPipelineCosine
 from resources.retrieval_queries.sections import CREDIT_MEMO_SECTIONS
 from resources.split_md_by_page import split_md_by_page
 import time
-
+import asyncio
 def load_prompts(file_path: str) -> dict:
     """Load YAML prompts as a dictionary of {section: prompt_text}."""
     with open(file_path, "r", encoding="utf-8") as f:
         return yaml.safe_load(f)
 
-def run_pipeline(md_file: str, n_results: int = 5, query: str = None):
+async def run_pipeline(md_file: str, n_results: int = 5, query: str = None):
     start = time.time()
     print(f"[INFO] Starting pipeline with Markdown file: {md_file}")
 
     # Step 1: Chunk + embeddings
     file_name=os.path.basename(md_file).replace(".md","")
     processor = chunker.MarkdownChunker(file_name,output_dir=config.OUTPUT_DIR)
-    chunks, embeddings = processor.create_embeddings_and_index(md_file)
+    chunks, embeddings = await processor.create_embeddings_and_index_async(md_file)
     print(f"[INFO] Processed {len(chunks)} chunks.")
 
     # Step 2: Initialize RAG pipeline
@@ -122,4 +122,4 @@ if __name__ == "__main__":
     parser.add_argument("--query", type=str, help="Run a single ad-hoc query instead of full memo")
     args = parser.parse_args()
 
-    run_pipeline(md_file=args.md, n_results=args.n_results, query=args.query)
+    asyncio.run(run_pipeline(md_file=args.md, n_results=args.n_results, query=args.query))

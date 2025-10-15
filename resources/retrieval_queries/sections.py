@@ -29,7 +29,8 @@ CREDIT_MEMO_SECTIONS = {
         "semantic_queries": [                
             {"query": "Company's relationship history with the bank","k":3,"filter":"loan"},         
         ],
-            "full_page": True
+            "full_page": True,
+            "include_for_recommendation": True
         },
         {
         "user_query": 
@@ -84,7 +85,8 @@ CREDIT_MEMO_SECTIONS = {
                 {"query": "balance sheet assets liabilities equity shareholders equity total debt", "k": 2},
                 {"query": "year over year financial performance, total revenue growth margins profitability trends", "k": 1}
         ],
-            "full_page": True
+            "full_page": True,
+            "include_for_recommendation": True
             },
             {
             "user_query": """
@@ -129,7 +131,8 @@ CREDIT_MEMO_SECTIONS = {
                 {"query": "current ratio, quick ratio, total assets liabilities", "k": 2, "filter":"table"},
             ],
             "full_page": True,
-            "include_for_summary":True
+            "include_for_summary":True,
+            "include_for_recommendation": True
             },
             {
             "user_query": """
@@ -172,7 +175,8 @@ CREDIT_MEMO_SECTIONS = {
                # {"query": "cash flow projections forecast future cash flow", "k": 1},
                 {"query": "statement of cash flows, net cash used, cash used in investing activities, operating activities, financing activites", "k":4, "filter":"table"},
         ],
-            "full_page": False
+            "full_page": False,
+            "include_for_recommendation": True
             }
         ],
         "Collateral and Security": [
@@ -209,7 +213,8 @@ CREDIT_MEMO_SECTIONS = {
             "semantic_queries": [
             {"query": "total assets, liabilities, real estate, equipment, inventory)", "k":2, "filter":"loan"},
             ],
-            "full_page": True
+            "full_page": True,
+            "include_for_recommendation": True
         }
         ],
     "Risk Assessment": [
@@ -244,7 +249,8 @@ Details about the risk ratings found in the provided document (if any).
                 {"query": "Details of external credit assessment and internal risk evaluation", "k": 3}
             ],
             "full_page": False, 
-            "include_for_summary":True
+            "include_for_summary":True,
+            # "include_for_recommendation": True
         },
         {
             "user_query": """/no_think You are a senior credit analyst. Using only the  above provided context, prepare a **professional narrative section** on the company’s **Key Strengths** relevant to a credit assessment.
@@ -304,7 +310,8 @@ Note:If no strengths are identified, state: “The provided context does not det
                 {"query": "Technological innovation, operational excellence, or brand leadership", "k": 5}
             ],
             "full_page":False, 
-            "include_for_summary":True
+            "include_for_summary":True,
+            "include_for_recommendation": True
         },
         {
             "user_query": """/no_think You are a senior credit analyst. Using only the above provided context, prepare a **professional narrative section** on the company’s **Key Weaknesses** relevant to a credit assessment.
@@ -361,7 +368,8 @@ Note: If no weaknesses are identified, state: “The provided context does not d
                 {"query": "competition pressure market challenges industry headwinds", "k": 3},
             ],
             "full_page": False,
-            "include_for_summary":True
+            "include_for_summary":True,
+            "include_for_recommendation": True
         },
         {
             "user_query": """/no_think You are a senior credit analyst. Using only the above provided context, prepare a **professional narrative section** on the company’s **Key Opportunities** that could strengthen its credit profile.
@@ -417,7 +425,8 @@ Note: If no opportunities are identified, state: “The provided context does no
                 {"query": "strategic investments partnerships collaborations", "k": 3},
                 {"query": "targets, vision, goals", "k": 2},
             ],
-            "full_page": False
+            "full_page": False,
+            "include_for_recommendation": True
         },
         {
             "user_query": """/no_think You are a senior credit analyst. Using only the above provided context, prepare a **professional narrative section** summarizing the company’s **Key Risks and Mitigation Strategies** relevant to its credit profile.
@@ -479,7 +488,8 @@ Note: If no clear risks are mentioned, state: "The provided context does not det
                 {"query": "environmental social climate risks", "k": 3},
                 {"query": "risk management framework policies procedures oversight", "k": 4}
             ],
-            "full_page": False
+            "full_page": False,
+            "include_for_recommendation": True
         },
         {
             "user_query": """Based on all the information analyzed in this Risk Assessment section and above context, provide a comprehensive **Credit Implications** analysis.
@@ -509,7 +519,8 @@ Offer a forward-looking perspective: improving, stable, or deteriorating outlook
                 {"query": "analyst commentary market expectations", "k": 3},
                 {"query": "credit metrics covenant compliance financial health", "k": 3}
             ],
-            "full_page": False
+            "full_page": False,
+            # "include_for_recommendation": True
         }
     ],
     "Loan Structure and Terms": [
@@ -583,7 +594,7 @@ Note: If no loan terms are disclosed, state: ”The provided context does not co
         {
         "user_query": """
         Generate a 1 page long Executive Summary section of the credit memo.
-        You don't have to analyse aything, you just have to extract the following information from the context.
+        You don't have to analyse anything, you just have to extract the following information from the context.
 
         Content to include (if available in context, Skip if not present):
         1. About the company
@@ -596,7 +607,20 @@ Note: If no loan terms are disclosed, state: ”The provided context does not co
         """
         ,
     }
-    ]    
+    ],
 
+    "Recommendation and Conclusion": [
+        {
+            "user_query": """/no_think You are an expert in providing recommendations based on credit information. Your task is to analyze the provided context and deliver a professional recommendation.
+            Guidelines:
+            1. The recommendation must be analytical and based only on the information in the provided context. Do not invent or assume data that is not explicitly stated.
+            2. Support your recommendation with clear evidence or reasoning drawn directly from the context.
+            3. If the context does not provide sufficient information to justify a recommendation, clearly state: “There is no sufficient evidence to support recommendation.”
+            4. Maintain a professional tone consistent with that of an experienced financial analyst with long-term expertise in the credit domain.
+            Output:
+            Provide a concise, evidence-based recommendation and a brief analytical conclusion summarizing the credit data mentioned in the context. 
+            """
+        }
 
+    ]
 }

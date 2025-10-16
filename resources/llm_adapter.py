@@ -17,7 +17,10 @@ class LocalLLMAdapter:
             "max_tokens": max_tokens,
             "temperature": temperature,
             "stream": False,
-            "think": False
+            "think": False,
+            "options": {
+                "num_ctx": 12288
+            }
         }
         if tools:
             payload["tools"] = tools

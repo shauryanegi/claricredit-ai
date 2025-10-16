@@ -38,7 +38,7 @@ class RAGPipelineCosine:
             # {"role": "user", "content": f"Question: {query}\n\nContext:\n{context}\n\nAnswer:"}
             {"role": "user", "content": f"Context:\n{context}\n\n{query}\n{ADDITIONAL_INSTRUCTIONS}"}
         ]
-        return self.llm.chat(messages, max_tokens=512)
+        return self.llm.chat(messages, max_tokens=1024)
 
     def run(self, group,split_page_file) -> str:
         user_query=group["user_query"]

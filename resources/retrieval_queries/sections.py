@@ -9,8 +9,7 @@ CREDIT_MEMO_SECTIONS = {
         f"""/no_think Write about the-
         - Board of directors/names of directors or management team
         Only use relevant information from the context to generate the report as some part of the context could be irrelevant.
-        Do not include anything that is not present in the context
-        This output will directly be a part of a bigger report with remaining sections. So refrain from using conversational language.
+        Do not include anything that is not present in the context.
         """,
 
         "semantic_queries": [                          
@@ -23,8 +22,7 @@ CREDIT_MEMO_SECTIONS = {
         f"""/no_think Write about the-
         - Relationship with {bank_name} (e.g., prior loans, payment history).
         Only use relevant information from the context to generate the report as some part of the context could be irrelevant.
-        Do not include anything that is not present in the context
-        This output will directly be a part of a bigger report with remaining sections. So refrain from using conversational language.""",
+        Do not include anything that is not present in the context.""",
 
         "semantic_queries": [                
             {"query": "Company's relationship history with the bank","k":3,"filter":"loan"},         
@@ -39,8 +37,7 @@ CREDIT_MEMO_SECTIONS = {
         - What the company does
         - Overview of the industry
         Be elaborate. Include as many facts as you can from the provided context.
-        Do not include anything that is not present in the context
-        This output will directly be a part of a bigger report with remaining sections. So refrain from using conversational language.""",
+        Do not include anything that is not present in the context.""",
         "semantic_queries": [                
             {"query": "About us, what we do, our history", "k": 3},
         ],
@@ -51,11 +48,11 @@ CREDIT_MEMO_SECTIONS = {
         """/no_think Write about the-
         - Percentage shares of the directors
         - any information about shareholders
-        Only use relevant information from the context to generate the report as some part of the context could be irrelevant.
-        Do not include anything that is not present in the context
-        This output will directly be a part of a bigger report with remaining sections. So refrain from using conversational language.""",
+        Only use relevant contexts to generate the report as some of the context could be irrelevant.
+        Do not include anything that is not present in the context.
+        Use an appropriate title for this section.""",
             "semantic_queries": [
-                {"query": "Who are the shareholders of the company, and how are shares distributed among them?", "k": 3}, 
+                {"query": "Who are the shareholders of the company, and how are shares distributed among them?", "k": 2}, 
             ],
             "full_page": True
         }

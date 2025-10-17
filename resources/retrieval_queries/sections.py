@@ -1,219 +1,235 @@
-
 from datetime import datetime
+
 current_year = datetime.now().year
-bank_name="Maybank Malaysia"
+bank_name = "Maybank Malaysia"
+
+SECTION_ORDER = [
+    "Executive Summary",
+    "Borrower, Management, and Ownership",
+    "Financial Analysis",
+    "Collateral and Security",
+    "Risk Assessment",
+    "Loan Structure and Terms",
+    "Recommendation and Conclusion",
+]
+
 CREDIT_MEMO_SECTIONS = {
     "Borrower, Management, and Ownership": [
         {
-        "user_query": 
-        f"""/no_think Write about the-
+            "user_query":
+                f"""/no_think Write about the-
         - Board of directors/names of directors or management team
         Only use relevant information from the context to generate the report as some part of the context could be irrelevant.
         Do not include anything that is not present in the context.
         """,
 
-        "semantic_queries": [                          
-            {"query": "Describe the company's board of directors including their names and positions", "k": 3},
-        ],
+            "semantic_queries": [
+                {"query": "Describe the company's board of directors including their names and positions", "k": 3},
+            ],
             "full_page": True
         },
         {
-        "user_query": 
-        f"""/no_think Write about the-
+            "user_query":
+                f"""/no_think Write about the-
         - Relationship with {bank_name} (e.g., prior loans, payment history).
         Only use relevant information from the context to generate the report as some part of the context could be irrelevant.
         Do not include anything that is not present in the context.""",
 
-        "semantic_queries": [                
-            {"query": "Company's relationship history with the bank","k":3,"filter":"loan"},         
-        ],
+            "semantic_queries": [
+                {"query": "Company's relationship history with the bank", "k": 3, "filter": "loan"},
+            ],
             "full_page": True,
             "include_for_recommendation": True
         },
         {
-        "user_query": 
-        f"""/no_think Write regarding-
+            "user_query":
+                f"""/no_think Write regarding-
         - About the company
         - What the company does
         - Overview of the industry
         Be elaborate. Include as many facts as you can from the provided context.
         Do not include anything that is not present in the context.""",
-        "semantic_queries": [                
-            {"query": "About us, what we do, our history", "k": 3},
-        ],
-            "full_page": True, "include_for_summary":True
+            "semantic_queries": [
+                {"query": "About us, what we do, our history", "k": 3},
+            ],
+            "full_page": True, "include_for_summary": True
         },
         {
-        "user_query": 
-        """/no_think Write about the-
-        - Percentage shares of the directors
-        - any information about shareholders
-        Only use relevant contexts to generate the report as some of the context could be irrelevant.
-        Do not include anything that is not present in the context.
-        Use an appropriate title for this section.""",
+            "user_query":
+                """/no_think Write about the-
+                - Percentage shares of the directors
+                - any information about shareholders
+                Only use relevant contexts to generate the report as some of the context could be irrelevant.
+                Do not include anything that is not present in the context.
+                Use an appropriate title for this section.""",
             "semantic_queries": [
-                {"query": "Who are the shareholders of the company, and how are shares distributed among them?", "k": 2}, 
+                {"query": "Who are the shareholders of the company, and how are shares distributed among them?",
+                 "k": 2},
             ],
             "full_page": True
         }
     ],
-   "Financial Analysis": [
-    {
-      "user_query": """
+    "Financial Analysis": [
+        {
+            "user_query": """
         /no_think Analyze the company's financial statements from the annual reports provided.
-        
+
         Extract and discuss:
         - Revenue trends: What are the actual revenue numbers? How much has it grown/declined year-over-year? What does this growth rate tell us about business momentum and market position?
         - Profitability (margins, EBITDA): What are the actual margin percentages? Are they improving or declining? What does this say about pricing power, cost control, and operational efficiency?
         - Assets, liabilities, equity: What are the actual balance sheet numbers? How is leverage changing? What does the asset composition tell us about the business?
- 
+
         For EVERY number you extract, explain:
         1. What the number actually is (state it clearly)
         2. WHY this number is significant for credit assessment
         3. What it reveals about the company's financial health and ability to repay debt
-        
+
         Note: Only take up values from the given context and do not calculate or assume values.
- 
+
         Write in detailed paragraphs. Make every number meaningful by explaining its significance.
-        
+
             """,
             "semantic_queries": [
-                {"query": "annual report financial statements income statement revenue EBITDA net income profit", "k": 2},
+                {"query": "annual report financial statements income statement revenue EBITDA net income profit",
+                 "k": 2},
                 {"query": "balance sheet assets liabilities equity shareholders equity total debt", "k": 2},
-                {"query": "year over year financial performance, total revenue growth margins profitability trends", "k": 1}
-        ],
+                {"query": "year over year financial performance, total revenue growth margins profitability trends",
+                 "k": 1}
+            ],
             "full_page": True,
             "include_for_recommendation": True
-            },
-            {
+        },
+        {
             "user_query": """
         /no_think You are a credit analyst. Using the extracted information from the company’s financial documents, produce a **detailed, plain-language analysis of key financial ratios**. Focus only on ratios, including but not limited to:
-        
+
         - DSCR (Debt Service Coverage Ratio)
         - Debt-to-EBITDA
         - LTV (Loan-to-Value)
         - Current Ratio, Quick Ratio
         - Net Gearing
         - Interest Coverage
-        
+
         FINANCIAL VALUE:
         DSCR: 1.7X
         Debt-to-EBITDA: 1.5X
         LTV: 65%
-        
-        
+
+
         Instructions:
-        
+
         1. For each ratio, clearly explain:
         - What the ratio value actually means in simple terms
         - How it compares to typical thresholds, regulatory limits, or industry standards
         - What it implies about the company’s **repayment ability, liquidity, leverage, and creditworthiness**
         - Any cushion or buffer (e.g., cash flow cushion for DSCR, equity buffer for LTV)
         - How sensitive the ratio is to adverse changes (e.g., how much cash flow could drop before DSCR breaches 1.25x)
-        
+
         2. Do **not** discuss unrelated items like loans, derivatives, fair value, or swaps unless directly tied to a ratio.
-        
+
         3. Present each ratio as a separate section with:
         - The ratio name and actual value
         - Plain-language explanation
         - Significance and risk assessment
         - Optional comparison to prior periods if available
-        
+
         Note: Only take up values from the given context and do not calculate or assume values.
- 
+
         Write detailed paragraphs for each ratio. Don't just state numbers - explain what they MEAN and why they MATTER.
             """,
             "semantic_queries": [
-                {"query": "capital management, gearing ratio, net debt", "k":2, "filter": "table"},
-                {"query": "current ratio, quick ratio, total assets liabilities", "k": 2, "filter":"table"},
+                {"query": "capital management, gearing ratio, net debt", "k": 2, "filter": "table"},
+                {"query": "current ratio, quick ratio, total assets liabilities", "k": 2, "filter": "table"},
             ],
             "full_page": True,
-            "include_for_summary":True,
+            "include_for_summary": True,
             "include_for_recommendation": True
-            },
-            {
+        },
+        {
             "user_query": """
         /no_think Analyze the company’s cash flow statements from the annual reports to assess business quality and repayment capacity. Focus on:
-        
+
         **Operating Cash Flow (OCF):**
         - Report actual OCF values for each year.
         - Describe the trend (growing, stable, or declining) and magnitude of change.
         - Explain what this pattern indicates about the company’s cash generation strength and stability.
         - Assess whether OCF comfortably covers debt servicing needs.
-        
+
         **Investing Cash Flow (ICF):**
         - Summarize spending on capital expenditures and investments.
         - Interpret what this investment level reveals about growth priorities and long-term sustainability.
-        
+
         **Financing Cash Flow (FCF):**
         - Explain whether the company is raising or repaying debt, and note any dividend or distribution payments.
         - Discuss how these flows affect leverage and liquidity.
-        
+
         **Free Cash Flow (if available):**
         - Report the actual FCF value and assess whether it provides a cushion for debt service.
-        
+
         **Cash Flow Outlook (if mentioned):**
         - Summarize projected cash flows and comment on their realism compared to historical performance.
         - Evaluate whether projected flows support timely loan repayment.
-        
+
         For every cash flow metric, explain:
         - The actual figure,
         - What it implies about operational performance,
         - Whether it ensures adequate debt coverage,
         - And what risks or vulnerabilities exist to ongoing cash generation.
-        
+
         **Note: Do not calculate anything on your own use values only from context
-        
+
         Write detailed analytical paragraphs integrating these insights into an overall assessment of repayment confidence.
             """,
             "semantic_queries": [
                 {"query": "consolidated cash flow from operations operating cash flow OCF annual report", "k": 2},
-               # {"query": "free cash flow FCF cash available debt service", "k": 1},
-               # {"query": "cash flow projections forecast future cash flow", "k": 1},
-                {"query": "statement of cash flows, net cash used, cash used in investing activities, operating activities, financing activites", "k":4, "filter":"table"},
-        ],
+                # {"query": "free cash flow FCF cash available debt service", "k": 1},
+                # {"query": "cash flow projections forecast future cash flow", "k": 1},
+                {
+                    "query": "statement of cash flows, net cash used, cash used in investing activities, operating activities, financing activites",
+                    "k": 4, "filter": "table"},
+            ],
             "full_page": False,
             "include_for_recommendation": True
-            }
-        ],
-        "Collateral and Security": [
+        }
+    ],
+    "Collateral and Security": [
         {
             "user_query": """
         /no_think You are a credit analyst. Using the retrieved information about the company’s pledged assets and appraisals, provide a detailed **collateral adequacy analysis** in the context of the proposed loan structure.
-        
+
         ### Instructions:
-        
+
         1. **Description of Pledged Assets**
         - Identify each asset pledged (e.g., plant & machinery, land, accounts receivable, inventory).
         - Include appraised values and any notes on valuation methodology or recent appraisal dates.
-        
+
         2. **Loan-to-Value (LTV) Assessment**
         - Compare the total appraised value of pledged assets to the proposed loan amount.
         - Calculate or confirm the LTV ratio.
         - Discuss whether the LTV indicates adequate collateral coverage relative to industry norms or bank thresholds.
-        
+
         3. **Collateral Quality & Perfection**
         - Assess the type and quality of assets (liquid vs. illiquid, fixed vs. current, marketable vs. specialized).
         - Mention if liens or security interests are perfected or legally enforceable.
-        
+
         4. **Adequacy vs. Proposed Loan**
         - Discuss whether the pledged collateral adequately supports the proposed loan of RM 7,500,000.
         - Consider sources and uses of funds (e.g., new plant, acquisition, working capital) and whether the collateral provides sufficient protection.
-        
+
         5. **Overall Implications**
         - Explain how collateral quality and LTV affect the lender’s risk.
         - Highlight any gaps, risks, or recommendations regarding additional security or monitoring.
-        
-        
+
+
         Write **detailed paragraphs**, not bullet points, integrating numeric insights (appraised values, LTV) and interpreting what the collateral picture means for **loan security and risk**.
             """,
             "semantic_queries": [
-            {"query": "total assets, liabilities, real estate, equipment, inventory)", "k":2, "filter":"loan"},
+                {"query": "total assets, liabilities, real estate, equipment, inventory)", "k": 2, "filter": "loan"},
             ],
             "full_page": True,
             "include_for_recommendation": True
         }
-        ],
+    ],
     "Risk Assessment": [
         {
             "user_query": """/no_think as an information extraction system and analyze the provided context to identify and report ONLY the company's external or internal credit rating and risk rating.
@@ -240,13 +256,15 @@ Details about the risk ratings found in the provided document (if any).
 
 """,
             "semantic_queries": [
-                {"query": "CARE A2+,CARE A-, AAA, Aaa, AA+, AA, AA-, Aa1, Aa2, Aa3, A+, A, A-, A1, A2, A3, BBB+, BBB, BBB-, Baa1, Baa2, Baa3", "k": 5},
+                {
+                    "query": "CARE A2+,CARE A-, AAA, Aaa, AA+, AA, AA-, Aa1, Aa2, Aa3, A+, A, A-, A1, A2, A3, BBB+, BBB, BBB-, Baa1, Baa2, Baa3",
+                    "k": 5},
                 {"query": "Details of credit rating, ratings, rating actions", "k": 2},
                 {"query": "Details of risk rating", "k": 2},
                 {"query": "Details of external credit assessment and internal risk evaluation", "k": 3}
             ],
-            "full_page": False, 
-            "include_for_summary":True,
+            "full_page": False,
+            "include_for_summary": True,
             # "include_for_recommendation": True
         },
         {
@@ -301,13 +319,16 @@ Opinions as an analyst on how these strengths impact credit quality.
 Note:If no strengths are identified, state: “The provided context does not detail specific strengths or competitive advantages.”""",
 
             "semantic_queries": [
-                {"query": "Strong financial foundation, liquidity ratios, assets, profitability, or solvency metrics", "k": 5},
-                {"query": "Company's competitive advantages, financial strengths, assets, liquidity position, and stability for lenders", "k": 5},
+                {"query": "Strong financial foundation, liquidity ratios, assets, profitability, or solvency metrics",
+                 "k": 5},
+                {
+                    "query": "Company's competitive advantages, financial strengths, assets, liquidity position, and stability for lenders",
+                    "k": 5},
                 {"query": "Market position, diversification, recurring income, or growth prospects", "k": 5},
                 {"query": "Technological innovation, operational excellence, or brand leadership", "k": 5}
             ],
-            "full_page":False, 
-            "include_for_summary":True,
+            "full_page": False,
+            "include_for_summary": True,
             "include_for_recommendation": True
         },
         {
@@ -338,7 +359,7 @@ Note: The above example is for illustrative purposes only. Do not copy it verbat
 - Use only verified data from the input context.
 - Always include source references in brackets (e.g., [Sustainability Report]) if mentioned. This can be the section name/title from the provided context.
 - Do not infer or fabricate information.
-            
+
 5. **Closing Summary:**
 - Summarize how these weaknesses may impact creditworthiness or risk stability.
 
@@ -365,7 +386,7 @@ Note: If no weaknesses are identified, state: “The provided context does not d
                 {"query": "competition pressure market challenges industry headwinds", "k": 3},
             ],
             "full_page": False,
-            "include_for_summary":True,
+            "include_for_summary": True,
             "include_for_recommendation": True
         },
         {
@@ -378,7 +399,7 @@ Note: If no weaknesses are identified, state: “The provided context does not d
 “The company’s expansion into renewable energy projects worth x presents a significant growth avenue, enhancing revenue diversification and improving long-term cash flow stability [Management Discussion, p.33].”
 
 Note: The above example is for illustrative purposes only. Do not copy it verbatim.
-            
+
 2. **Content Expectations:**
 - Identify **3–5 opportunities** likely to enhance credit strength.
 - Focus on initiatives such as:
@@ -533,7 +554,7 @@ Offer a forward-looking perspective: improving, stable, or deteriorating outlook
 - Present a structured summary that covers all key components of the proposed financing arrangement:
 - **Loan Amount**
 - **Interest Rate**
-- **Tenor / Maturity**
+- **Tenure / Maturity**
 - **Repayment Terms**
 - **Covenants**
 - **Fees / Charges** (if disclosed)
@@ -561,7 +582,7 @@ Present in a structured, readable format different uses of funds and their amoun
 ### OUTPUT EXAMPLE:
 **Loan Amount:**
 **Interest Rate:**
-**Tenor:**
+**Tenure:**
 **Repayment Terms:**
 **Covenants:**
 **Fees:**
@@ -578,32 +599,15 @@ Summarize
 Note: If no loan terms are disclosed, state: ”The provided context does not contain details regarding loan amount, structure, or repayment terms.”""",
             "semantic_queries": [
                 {"query": "Proposed loan amount, structure, and purpose of funds", "k": 2, "filter": "loan"},
-                {"query": "Loan amount, interest rate, tenor, and repayment schedule", "k": 2, "filter": "loan"},
-                {"query": "Financial covenants and loan conditions such as debt to EBITDA, DSCR, etc.", "k": 2, "filter": "loan"},
+                {"query": "Loan amount, interest rate, tenure, and repayment schedule", "k": 2, "filter": "loan"},
+                {"query": "Financial covenants and loan conditions such as debt to EBITDA, DSCR, etc.", "k": 2,
+                 "filter": "loan"},
                 {"query": "Sources and uses of funds breakdown", "k": 2, "filter": "loan"},
                 {"query": "Any applicable fees, charges, or facility costs", "k": 2, "filter": "loan"}
             ],
             "full_page": False,
-            "include_for_summary":True
+            "include_for_summary": True
         }
-    ],
-    "Executive Summary":[
-        {
-        "user_query": """
-        Generate a 1 page long Executive Summary section of the credit memo.
-        You don't have to analyse anything, you just have to extract the following information from the context.
-
-        Content to include (if available in context, Skip if not present):
-        1. About the company
-        2. Loan amount and purpose  
-        3. Key financial metrics 
-        4. Repayment information
-        5. Key risks and strengths  
-        6. Proposed risk rating  
-        7. Final recommendation (approve or decline)
-        """
-        ,
-    }
     ],
 
     "Recommendation and Conclusion": [
@@ -616,8 +620,27 @@ Note: If no loan terms are disclosed, state: ”The provided context does not co
             4. Maintain a professional tone consistent with that of an experienced financial analyst with long-term expertise in the credit domain.
             Output:
             Provide a concise, evidence-based recommendation and a brief analytical conclusion summarizing the credit data mentioned in the context. 
-            """
+            """,
+            "include_for_summary": True
         }
+    ],
+    "Executive Summary": [
+        {
+            "user_query": """
+        Generate a 1 page long Executive Summary section of the credit memo.
+        You don't have to analyse anything, you just have to extract the following information from the context.
 
-    ]
+        Content to include (if available in context, Skip if not present):
+        1. About the company
+        2. Loan amount and purpose  
+        3. Key financial metrics 
+        4. Repayment information
+        5. Key risks and strengths  
+        6. Proposed risk rating  
+        7. Final recommendation (approve or decline)
+        """
+            ,
+        }
+    ],
+
 }

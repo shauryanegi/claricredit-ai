@@ -49,9 +49,7 @@ def extract_pdf(pdf_path: str, retries: int = 3, timeout: int = 300) -> str:
             md_text = resp_json.get("data", "")
 
             # Save to markdown if successful
-            filename = os.path.basename(pdf_path).replace(".pdf", ".md")
-            output_path = os.path.join(config.OUTPUT_DIR, filename)
-            os.makedirs(config.OUTPUT_DIR, exist_ok=True)
+            output_path = pdf_path.replace(".pdf", ".md")
 
             logging.debug(f"Writing response text to {output_path}")
             with open(output_path, "w", encoding="utf-8") as f:

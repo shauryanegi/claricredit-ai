@@ -59,7 +59,7 @@ class MarkdownChunker:
         self.output_dir = output_dir
         os.makedirs(output_dir, exist_ok=True)
         
-        self.chroma_client = chromadb.PersistentClient(path=config.CHROMA_PATH)
+        self.chroma_client = chromadb.Client()
         self.collection = self.chroma_client.get_or_create_collection(
             name=f"markdown_chunks_{file_name}",
             metadata={"hnsw:space": "cosine"}

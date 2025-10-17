@@ -8,9 +8,9 @@ from collections import OrderedDict
 import json
 
 class RAGPipelineCosine:
-    def __init__(self, chroma_path: str, collection_name: str,
+    def __init__(self, collection_name: str,
                  llm_endpoint: str, llm_model: str):
-        self.chroma_client = chromadb.PersistentClient(path=chroma_path)
+        self.chroma_client = chromadb.Client()
         self.collection = self.chroma_client.get_or_create_collection(collection_name)
         self.llm = LocalLLMAdapter(endpoint=llm_endpoint, model=llm_model)
 

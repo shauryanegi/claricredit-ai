@@ -282,11 +282,10 @@ async def generate_credit_memo(request: PayloadRequest):
             with open(output_path, "rb") as file:
                 md_file_encoded = base64.b64encode(file.read()).decode("utf-8")
 
-            yield {json.dumps(PayloadResponse(req_id=req_id, credit_memo=md_file_encoded, success=True, error_message=None).model_dump())}
+            yield json.dumps(PayloadResponse(req_id=req_id, credit_memo=md_file_encoded, success=True, error_message=None).model_dump())
         except Exception as e:
             logger.exception(f" Error occurred while execution: {e}")
-            yield {
-                json.dumps(
+            yield json.dumps(
                     PayloadResponse(
                         req_id=request.req_id,
                         credit_memo="",
@@ -294,7 +293,7 @@ async def generate_credit_memo(request: PayloadRequest):
                         error_message="Error occurred while execution",
                     ).model_dump()
                 )
-            }
+
         finally:
             shutil.rmtree(pdf_file_path)
             logging.info(f"Deleted temporary files in {pdf_file_path}")

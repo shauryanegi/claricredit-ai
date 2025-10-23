@@ -32,7 +32,7 @@ class RAGPipelineCosine:
         return list(zip(docs, metas))
 
     def generate_answer(self, query: str, context_docs: List[str]) -> str:
-        context = "\n\n".join([f"Context {i+1}:\n{doc}" for i, doc in enumerate(context_docs)])
+        context = "\n\n".join(context_docs)
         messages = [
             {"role": "system", "content": SYSTEM_PROMPT},
             # {"role": "user", "content": f"Question: {query}\n\nContext:\n{context}\n\nAnswer:"}

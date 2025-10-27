@@ -103,7 +103,7 @@ class MarkdownChunker:
         return chunks
  
     def clean_marker_md(self, raw_text: str, remove_images: bool = False) -> str:
-        text = raw_text.replace("\n", "")
+        text = raw_text.replace("\\n", "")
         text = re.sub(r'<[^>]+>', '', text)
         text = re.sub(r'<IR>', '', text)
         text = re.sub(r'(#+)\s*\*\*(.*?)\*\*', r'\1 \2', text)

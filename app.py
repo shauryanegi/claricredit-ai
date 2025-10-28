@@ -41,7 +41,6 @@ class PayloadResponse(BaseModel):
 
 class ProcessMessage(BaseModel):
     req_id: str
-    message: str
 
 
 def run_rag_tasks_in_parallel(rag, parallel_tasks, summary_group, recommendation_group, split_page_file):
@@ -49,6 +48,7 @@ def run_rag_tasks_in_parallel(rag, parallel_tasks, summary_group, recommendation
     summary_context = []
     recommendation_context = []
 
+    # Run independent section tasks in parallel 
     with concurrent.futures.ThreadPoolExecutor() as executor:
         logging.info(f"Using {executor._max_workers} worker threads for parallel execution.")
         future_to_task = {executor.submit(rag.run, task[1], split_page_file): task for task in parallel_tasks}
@@ -73,10 +73,34 @@ def run_rag_tasks_in_parallel(rag, parallel_tasks, summary_group, recommendation
             except Exception as exc:
                 logging.error(f'Section "{section}" generated an exception: {exc}')
 
-    # Run dependent tasks (Summary and Recommendation)
+    # Run dependent tasks (Recommendation first, then Summary) 
     with concurrent.futures.ThreadPoolExecutor() as executor:
         future_to_task = {}
+
+        # --- Step A: run Recommendation first (so its output can go into summary) ---
+        recommendation_answer = None
+        if recommendation_group:
+            future = executor.submit(
+                rag.generate_answer,
+                recommendation_group[1]["user_query"],
+                recommendation_context
+            )
+            future_to_task[future] = recommendation_group
+
+        # Wait for recommendation (if any) to finish
+        for future in concurrent.futures.as_completed(future_to_task):
+            section, group = future_to_task[future]
+            try:
+                recommendation_answer = future.result()
+                results[section].append(recommendation_answer)
+                logging.info(f"Completed section: {section}")
+            except Exception as exc:
+                logging.error(f'Section "{section}" generated an exception: {exc}')
+
+        # --- Step B: now run Summary, including recommendation output in context ---
+        future_to_task = {}
         if summary_group:
+            # prepend base context
             summary_context.insert(0, """Loan Request and Proposed Structure
                     Sources and Uses of Funds
                     Sources of Funds
@@ -104,12 +128,18 @@ def run_rag_tasks_in_parallel(rag, parallel_tasks, summary_group, recommendation
                     Total Appraised Value: RM 13,000,000
                     Loan Amount: RM 7,500,000
                     Calculated Loan-to-Value (LTV) Ratio: ~65%""")
-            future_to_task[
-                executor.submit(rag.generate_answer, summary_group[1]["user_query"], summary_context)] = summary_group
 
-        if recommendation_group:
-            future_to_task[executor.submit(rag.generate_answer, recommendation_group[1]["user_query"],
-                                           recommendation_context)] = recommendation_group
+            # add recommendation to summary context
+            if recommendation_answer:
+                summary_context.append(recommendation_answer)
+
+            future_to_task[
+                executor.submit(
+                    rag.generate_answer,
+                    summary_group[1]["user_query"],
+                    summary_context
+                )
+            ] = summary_group
 
         for future in concurrent.futures.as_completed(future_to_task):
             section, group = future_to_task[future]
@@ -119,6 +149,7 @@ def run_rag_tasks_in_parallel(rag, parallel_tasks, summary_group, recommendation
                 logging.info(f"Completed section: {section}")
             except Exception as exc:
                 logging.error(f'Section "{section}" generated an exception: {exc}')
+
     return results
 
 @app.post("/credit-memo")
@@ -242,7 +273,6 @@ async def generate_credit_memo(request: PayloadRequest):
                 output_path = os.path.join(pdf_file_path, f"report_{req_id}_{file_name}.md")
                 with open(output_path, "w", encoding="utf-8") as f:
                     for section in SECTION_ORDER:
-                        # for section in CREDIT_MEMO_SECTIONS:
                         if section not in results:
                             logging.debug(f"'{section}' not in results, check section name")
                         else:
@@ -256,7 +286,6 @@ async def generate_credit_memo(request: PayloadRequest):
                                         # Remove first line if it contains 'executive summary'
                                         lines = ans.splitlines()
                                         if lines and "executive summary" in lines[0].lower():
-                                            print("removed", lines[0])
                                             lines = lines[1:]
                                         ans = "\n".join(lines).strip()
                                         cleaned_answers.append(ans)

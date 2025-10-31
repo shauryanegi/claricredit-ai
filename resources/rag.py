@@ -31,19 +31,20 @@ class RAGPipelineCosine:
         metas = results["metadatas"][0]
         return list(zip(docs, metas))
 
-    def generate_answer(self, query: str, context_docs: List[str]) -> str:
+    def generate_answer(self, query: str, context_docs: List[str], fin_data: str) -> str:
         context = "\n\n".join(context_docs)
         messages = [
             {"role": "system", "content": SYSTEM_PROMPT},
             # {"role": "user", "content": f"Question: {query}\n\nContext:\n{context}\n\nAnswer:"}
-            {"role": "user", "content": f"Context:\n{context}\n\n{query}\n{ADDITIONAL_INSTRUCTIONS}"}
+            {"role": "user", "content": f"Context:\n{context}\n{fin_data}\n\n{query}\n{ADDITIONAL_INSTRUCTIONS}"}
         ]
         return self.llm.chat(messages, max_tokens=1024)
 
-    def run(self, group,split_page_file) -> str:
+    def run(self, group,split_page_file,financial_data) -> str:
         user_query=group["user_query"]
         semantic_queries=group["semantic_queries"]
         full_page=group["full_page"]
+        fin_data_needed = group["fin_data_needed"]
         if full_page:
             all_docs=[]
             seen = set()
@@ -79,5 +80,8 @@ class RAGPipelineCosine:
                 retrieved_docs_with_meta.extend(docs_with_meta)
 
             all_docs = list(OrderedDict.fromkeys([doc for doc, meta in retrieved_docs_with_meta]))
-
-        return self.generate_answer(user_query, all_docs)
+        if fin_data_needed:
+            fin_data = financial_data
+        else:
+            fin_data = ""
+        return self.generate_answer(user_query, all_docs, fin_data)

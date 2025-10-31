@@ -24,8 +24,8 @@ def extract_pdf(pdf_path: str, retries: int = 3, timeout: int = 300) -> str:
     Retries multiple times with long timeout before giving up.
     """
     start_time = time.time()
-    base_url = config.LLM_ENDPOINT.split("/api")[0]
-    url = f"{base_url}/api/v1/marker-text-extraction"
+    #base_url = config.LLM_ENDPOINT.split("/api")[0]
+    url = config.MARKER_URL
     logging.info(f"Using Marker API: {url}")
 
     req_data = {

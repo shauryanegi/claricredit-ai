@@ -5,7 +5,7 @@ import base64
 import asyncio
 import concurrent.futures
 import shutil
-
+import time
 from resources.config import config
 from resources import chunker, extractor
 from resources.rag import RAGPipelineCosine
@@ -42,8 +42,7 @@ class PayloadResponse(BaseModel):
 class ProcessMessage(BaseModel):
     req_id: str
 
-
-def run_rag_tasks_in_parallel(rag, parallel_tasks, summary_group, recommendation_group, split_page_file):
+def run_rag_tasks_in_parallel(rag, parallel_tasks, summary_group, recommendation_group, split_page_file, financial_data):
     results = {section: [] for section in CREDIT_MEMO_SECTIONS}
     summary_context = []
     recommendation_context = []
@@ -51,7 +50,7 @@ def run_rag_tasks_in_parallel(rag, parallel_tasks, summary_group, recommendation
     # Run independent section tasks in parallel 
     with concurrent.futures.ThreadPoolExecutor() as executor:
         logging.info(f"Using {executor._max_workers} worker threads for parallel execution.")
-        future_to_task = {executor.submit(rag.run, task[1], split_page_file): task for task in parallel_tasks}
+        future_to_task = {executor.submit(rag.run, task[1], split_page_file, financial_data): task for task in parallel_tasks}
 
         for future in concurrent.futures.as_completed(future_to_task):
             section, group = future_to_task[future]
@@ -83,7 +82,8 @@ def run_rag_tasks_in_parallel(rag, parallel_tasks, summary_group, recommendation
             future = executor.submit(
                 rag.generate_answer,
                 recommendation_group[1]["user_query"],
-                recommendation_context
+                recommendation_context,
+                financial_data
             )
             future_to_task[future] = recommendation_group
 
@@ -137,7 +137,8 @@ def run_rag_tasks_in_parallel(rag, parallel_tasks, summary_group, recommendation
                 executor.submit(
                     rag.generate_answer,
                     summary_group[1]["user_query"],
-                    summary_context
+                    summary_context,
+                    financial_data
                 )
             ] = summary_group
 
@@ -156,9 +157,16 @@ def run_rag_tasks_in_parallel(rag, parallel_tasks, summary_group, recommendation
 async def generate_credit_memo(request: PayloadRequest):
     async def event_stream():
         try:
+            timestamp_ms = int(time.time()*1000)
             req_id = request.req_id
             doc_base64 = request.doc_base64
             financial_data = request.financial_data
+            formatted = ""
+            if financial_data:
+                financial_data = {k: v for k, v in financial_data.items() if v != ""}
+                logger.info(f"Financial data: {financial_data}")
+                fin_data = "\n".join([f"- {key}: {value}" for key, value in financial_data.items()])
+                formatted = f"Financial Data:\n{fin_data}"
 
             logger.info(f"Received request with req_id: {req_id}")
             if not req_id or not doc_base64:
@@ -167,12 +175,12 @@ async def generate_credit_memo(request: PayloadRequest):
 
 
             os.makedirs(config.PDF_DIR, exist_ok=True)
-            pdf_file_path = os.path.join(config.PDF_DIR, f"cache_{req_id}")
+            pdf_file_path = os.path.join(config.PDF_DIR, f"cache_{req_id}_{timestamp_ms}")
             os.makedirs(pdf_file_path, exist_ok=True)
 
 
             for i, b64_doc in enumerate(doc_base64):
-                file_path = os.path.join(pdf_file_path, f"credit_doc_{req_id}_{i}.pdf")
+                file_path = os.path.join(pdf_file_path, f"credit_doc_{req_id}_{timestamp_ms}_{i}.pdf")
                 with open(file_path, "wb") as f:
                     f.write(base64.b64decode(b64_doc))
 
@@ -191,6 +199,7 @@ async def generate_credit_memo(request: PayloadRequest):
                     if file_name.lower().endswith(".pdf"):
                         print(os.path.join(pdf_file_path,file_name))
                         md_file.append(extractor.extract_pdf(os.path.join(pdf_file_path,file_name)))
+                        #md_file.append("/home/dhaval/Desktop/CreditApp/credit-memo/outputs/AurionPro.md")
                 yield {
                     "event": "message",
                     "data": json.dumps(
@@ -251,7 +260,8 @@ async def generate_credit_memo(request: PayloadRequest):
                     parallel_tasks,
                     summary_group,
                     recommendation_group,
-                    split_page_file
+                    split_page_file,
+                    formatted
                 )
 
                 yield {

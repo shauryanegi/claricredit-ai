@@ -26,7 +26,8 @@ CREDIT_MEMO_SECTIONS = {
             "semantic_queries": [
                 {"query": "Describe the company's board of directors including their names and positions", "k": 3},
             ],
-            "full_page": True
+            "full_page": True,
+            "fin_data_needed": False
         },
         {
             "user_query":
@@ -39,7 +40,8 @@ CREDIT_MEMO_SECTIONS = {
                 {"query": "Company's relationship history with the bank", "k": 3, "filter": "loan"},
             ],
             "full_page": True,
-            "include_for_recommendation": True
+            "include_for_recommendation": True,
+            "fin_data_needed": False
         },
         {
             "user_query":
@@ -52,7 +54,7 @@ CREDIT_MEMO_SECTIONS = {
             "semantic_queries": [
                 {"query": "About us, what we do, our history", "k": 3},
             ],
-            "full_page": True, "include_for_summary": True
+            "full_page": True, "include_for_summary": True, "fin_data_needed": False
         },
         {
             "user_query":
@@ -66,7 +68,7 @@ CREDIT_MEMO_SECTIONS = {
                 {"query": "Who are the shareholders of the company, and how are shares distributed among them?",
                  "k": 2},
             ],
-            "full_page": True
+            "full_page": True, "fin_data_needed": False
         }
     ],
     "Financial Analysis": [
@@ -97,24 +99,27 @@ CREDIT_MEMO_SECTIONS = {
                  "k": 1}
             ],
             "full_page": True,
-            "include_for_recommendation": True
+            "include_for_recommendation": True, "fin_data_needed": False
         },
         {
             "user_query": """
         /no_think You are a credit analyst. Using the extracted information from the company’s financial documents, produce a **detailed, plain-language analysis of key financial ratios**. Focus only on ratios, including but not limited to:
 
-        - DSCR (Debt Service Coverage Ratio)
-        - Debt-to-EBITDA
-        - LTV (Loan-to-Value)
-        - Current Ratio, Quick Ratio
-        - Net Gearing
-        - Interest Coverage
-
-        FINANCIAL VALUE:
-        DSCR: 1.7X
-        Debt-to-EBITDA: 1.5X
-        LTV: 65%
-
+        -Gearing Ratio
+        -Cash Ratio
+        -Current Ratio
+        -Quick Ratio
+        -Debt-to-Equity Ratio
+        -Debt Ratio
+        -Net Profit Margin
+        -Operating Margin
+        -Return on Assets (ROA)
+        -Return on Equity (ROE)
+        -Asset Turnover Ratio
+        -Inventory Turnover
+        -Operating Cash Flow Ratio
+        -Free Cash Flow
+        -Debt to Asset Ratio
 
         Instructions:
 
@@ -134,7 +139,8 @@ CREDIT_MEMO_SECTIONS = {
         - Optional comparison to prior periods if available
 
         Note: Only take up values from the given context and do not calculate or assume values.
-
+        Note: If you are not able to find values from the Financial Data, see it from context,
+        Note: If values are not present do not output anything for that ratio.
         Write detailed paragraphs for each ratio. Don't just state numbers - explain what they MEAN and why they MATTER.
             """,
             "semantic_queries": [
@@ -143,7 +149,7 @@ CREDIT_MEMO_SECTIONS = {
             ],
             "full_page": True,
             "include_for_summary": True,
-            "include_for_recommendation": True
+            "include_for_recommendation": True, "fin_data_needed": True
         },
         {
             "user_query": """
@@ -162,9 +168,6 @@ CREDIT_MEMO_SECTIONS = {
         **Financing Cash Flow (FCF):**
         - Explain whether the company is raising or repaying debt, and note any dividend or distribution payments.
         - Discuss how these flows affect leverage and liquidity.
-
-        **Free Cash Flow (if available):**
-        - Report the actual FCF value and assess whether it provides a cushion for debt service.
 
         **Cash Flow Outlook (if mentioned):**
         - Summarize projected cash flows and comment on their realism compared to historical performance.
@@ -189,7 +192,7 @@ CREDIT_MEMO_SECTIONS = {
                     "k": 4, "filter": "table"},
             ],
             "full_page": False,
-            "include_for_recommendation": True
+            "include_for_recommendation": True, "fin_data_needed": False
         }
     ],
     "Collateral and Security": [
@@ -227,7 +230,7 @@ CREDIT_MEMO_SECTIONS = {
                 {"query": "total assets, liabilities, real estate, equipment, inventory)", "k": 2, "filter": "loan"},
             ],
             "full_page": True,
-            "include_for_recommendation": True
+            "include_for_recommendation": True, "fin_data_needed": False
         }
     ],
     "Risk Assessment": [
@@ -264,7 +267,7 @@ Details about the risk ratings found in the provided document (if any).
                 {"query": "Details of external credit assessment and internal risk evaluation", "k": 3}
             ],
             "full_page": False,
-            "include_for_summary": True,
+            "include_for_summary": True, "fin_data_needed": False
             # "include_for_recommendation": True
         },
         {
@@ -329,7 +332,7 @@ Note:If no strengths are identified, state: “The provided context does not det
             ],
             "full_page": False,
             "include_for_summary": True,
-            "include_for_recommendation": True
+            "include_for_recommendation": True, "fin_data_needed": False
         },
         {
             "user_query": """/no_think You are a senior credit analyst. Using only the above provided context, prepare a **professional narrative section** on the company’s **Key Weaknesses** relevant to a credit assessment.
@@ -387,7 +390,7 @@ Note: If no weaknesses are identified, state: “The provided context does not d
             ],
             "full_page": False,
             "include_for_summary": True,
-            "include_for_recommendation": True
+            "include_for_recommendation": True, "fin_data_needed": False
         },
         {
             "user_query": """/no_think You are a senior credit analyst. Using only the above provided context, prepare a **professional narrative section** on the company’s **Key Opportunities** that could strengthen its credit profile.
@@ -444,7 +447,7 @@ Note: If no opportunities are identified, state: “The provided context does no
                 {"query": "targets, vision, goals", "k": 2},
             ],
             "full_page": False,
-            "include_for_recommendation": True
+            "include_for_recommendation": True, "fin_data_needed": False
         },
         {
             "user_query": """/no_think You are a senior credit analyst. Using only the above provided context, prepare a **professional narrative section** summarizing the company’s **Key Risks and Mitigation Strategies** relevant to its credit profile.
@@ -507,7 +510,7 @@ Note: If no clear risks are mentioned, state: "The provided context does not det
                 {"query": "risk management framework policies procedures oversight", "k": 4}
             ],
             "full_page": False,
-            "include_for_recommendation": True
+            "include_for_recommendation": True, "fin_data_needed": False
         },
         {
             "user_query": """Based on all the information analyzed in this Risk Assessment section and above context, provide a comprehensive **Credit Implications** analysis.
@@ -538,6 +541,7 @@ Offer a forward-looking perspective: improving, stable, or deteriorating outlook
                 {"query": "credit metrics covenant compliance financial health", "k": 3}
             ],
             "full_page": False,
+            "fin_data_needed": False
             # "include_for_recommendation": True
         }
     ],
@@ -606,7 +610,8 @@ Note: If no loan terms are disclosed, state: ”The provided context does not co
                 {"query": "Any applicable fees, charges, or facility costs", "k": 2, "filter": "loan"}
             ],
             "full_page": False,
-            "include_for_summary": True
+            "include_for_summary": True, 
+            "fin_data_needed": False
         }
     ],
 
@@ -621,7 +626,8 @@ Note: If no loan terms are disclosed, state: ”The provided context does not co
             Output:
             Provide a concise, evidence-based recommendation and a brief analytical conclusion summarizing the credit data mentioned in the context. 
             """,
-            "include_for_summary": True
+            "include_for_summary": True,
+            "fin_data_needed": False
         }
     ],
     "Executive Summary": [
@@ -640,6 +646,7 @@ Note: If no loan terms are disclosed, state: ”The provided context does not co
         7. Final recommendation (approve or decline)
         """
             ,
+            "fin_data_needed": False
         }
     ],
 

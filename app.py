@@ -174,8 +174,8 @@ async def generate_credit_memo(request: PayloadRequest):
                 for i, file_name in enumerate(os.listdir(pdf_file_path)):
                     if file_name.lower().endswith(".pdf"):
                         print(os.path.join(pdf_file_path,file_name))
-                        # md_file.append(extractor.extract_pdf(os.path.join(pdf_file_path,file_name)))
-                        md_file.append("files/Gamuda.md")
+                        md_file.append(extractor.extract_pdf(os.path.join(pdf_file_path,file_name)))
+                        # md_file.append("files/Gamuda.md")
                         
                 yield {
                     "event": "message",

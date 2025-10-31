@@ -30,6 +30,8 @@ class PayloadRequest(BaseModel):
     req_id: str
     doc_base64: list[str]
     financial_data: Optional[dict[str, str]]
+    loan_doc: Optional[bool]=False
+    loan_doc_base64: Optional[str]=None
 
 
 class PayloadResponse(BaseModel):
@@ -100,35 +102,7 @@ def run_rag_tasks_in_parallel(rag, parallel_tasks, summary_group, recommendation
         # --- Step B: now run Summary, including recommendation output in context ---
         future_to_task = {}
         if summary_group:
-            # prepend base context
-            summary_context.insert(0, """Loan Request and Proposed Structure
-                    Sources and Uses of Funds
-                    Sources of Funds
-                    Proposed Term Loan: RM 7,500,000
-                    Internal Accruals: RM 2,500,000
-                    Total Sources: RM 10,000,000
-                    Uses of Funds
-                    New Plant Construction: RM 4,000,000
-                    Acquisition of Competitor: RM 5,000,000
-                    Working Capital Buffer: RM 1,000,000
-                    Total Uses: RM 10,000,000
-                    Proposed Loan Facility
-                    Loan Amount: RM 7,500,000
-                    Interest Rate: 10% p.a. (fixed)
-                    Loan Term: 10 years
-                    Repayment Schedule: Equal annual installments of principal and interest
-                    Purpose of Funds
-                    The funds will be utilized for capital expenditure related to the construction of a new plant, the strategic acquisition of a key competitor, and to maintain an adequate working capital buffer.
-                    6. Collateral Analysis
-                    Assets Pledged
-                    Existing Plant & Machinery – Appraised Value: RM 6,000,000
-                    Land Parcel (Industrial) – Appraised Value: RM 5,000,000
-                    Accounts Receivable – Appraised Value: RM 2,000,000
-                    Collateral Adequacy
-                    Total Appraised Value: RM 13,000,000
-                    Loan Amount: RM 7,500,000
-                    Calculated Loan-to-Value (LTV) Ratio: ~65%""")
-
+            
             # add recommendation to summary context
             if recommendation_answer:
                 summary_context.append(recommendation_answer)
@@ -161,6 +135,8 @@ async def generate_credit_memo(request: PayloadRequest):
             req_id = request.req_id
             doc_base64 = request.doc_base64
             financial_data = request.financial_data
+            loan_doc=request.loan_doc
+            loan_doc_base64=request.loan_doc_base64
             formatted = ""
             if financial_data:
                 financial_data = {k: v for k, v in financial_data.items() if v != ""}
@@ -198,8 +174,9 @@ async def generate_credit_memo(request: PayloadRequest):
                 for i, file_name in enumerate(os.listdir(pdf_file_path)):
                     if file_name.lower().endswith(".pdf"):
                         print(os.path.join(pdf_file_path,file_name))
-                        md_file.append(extractor.extract_pdf(os.path.join(pdf_file_path,file_name)))
-                        #md_file.append("/home/dhaval/Desktop/CreditApp/credit-memo/outputs/AurionPro.md")
+                        # md_file.append(extractor.extract_pdf(os.path.join(pdf_file_path,file_name)))
+                        md_file.append("files/Gamuda.md")
+                        
                 yield {
                     "event": "message",
                     "data": json.dumps(
@@ -251,8 +228,15 @@ async def generate_credit_memo(request: PayloadRequest):
                     elif section == "Recommendation and Conclusion":
                         recommendation_group = (section, groups[0])
                     else:
-                        for group in groups:
-                            parallel_tasks.append((section, group))
+                        if loan_doc:
+                            for group in groups:
+                                parallel_tasks.append((section, group))
+                        else:
+                            if section=="Collateral and Security" or section=="Loan Structure and Terms":
+                                continue
+                            else:
+                                for group in groups:
+                                    parallel_tasks.append((section, group))
 
                 results = await asyncio.to_thread(
                     run_rag_tasks_in_parallel,
@@ -286,6 +270,9 @@ async def generate_credit_memo(request: PayloadRequest):
                         if section not in results:
                             logging.debug(f"'{section}' not in results, check section name")
                         else:
+                            if loan_doc==False:
+                                if section=="Collateral and Security" or section=="Loan Structure and Terms":
+                                    continue    
                             answers = results[section]
                             if answers:
                                 if section == "Executive Summary":

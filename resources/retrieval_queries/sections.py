@@ -5,7 +5,7 @@ bank_name = "Maybank Malaysia"
 
 SECTION_ORDER = [
     "Executive Summary",
-    "Borrower, Management, and Ownership",
+    "Background, Management, and Ownership",
     "Financial Analysis",
     "Collateral and Security",
     "Risk Assessment",
@@ -14,7 +14,7 @@ SECTION_ORDER = [
 ]
 
 CREDIT_MEMO_SECTIONS = {
-    "Borrower, Management, and Ownership": [
+    "Background, Management, and Ownership": [
         {
             "user_query":
                 f"""/no_think Write about the-
@@ -638,7 +638,7 @@ Note: If no loan terms are disclosed, state: ”The provided context does not co
 
         Content to include (if available in context, Skip if not present):
         1. About the company
-        2. Loan amount and purpose  
+        2. Loan amount and purpose (Don't include this section if details about loan amount and purpose are not present in the context. Skip this section in that case) 
         3. Key financial metrics 
         4. Repayment information
         5. Key risks and strengths  

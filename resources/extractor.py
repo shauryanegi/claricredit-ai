@@ -2,29 +2,31 @@ import requests
 import base64
 import os
 import time
+import logging
 from resources.config import config
 
 def image_to_base64(file_path: str) -> str:
     """Convert a PDF or image file to base64 string."""
-    print(f"[DEBUG] Reading file: {file_path}")
+    logging.debug(f"Reading file: {file_path}")
     try:
         with open(file_path, "rb") as f:
             data = f.read()
-        print(f"[DEBUG] File size: {len(data)} bytes")
+        logging.debug(f"File size: {len(data)} bytes")
         encoded = base64.b64encode(data).decode("utf-8")
-        print(f"[DEBUG] Encoded base64 length: {len(encoded)}")
+        logging.debug(f"Encoded base64 length: {len(encoded)}")
         return encoded
     except Exception as e:
-        raise RuntimeError(f"[ERROR] Failed to read/encode file: {e}")
+        raise RuntimeError(f"Failed to read/encode file: {e}")
 
 def extract_pdf(pdf_path: str, retries: int = 3, timeout: int = 300) -> str:
     """
     Send PDF to Marker API and save markdown output.
     Retries multiple times with long timeout before giving up.
     """
-    base_url = config.LLM_ENDPOINT.split("/api")[0]
-    url = f"{base_url}/api/v1/marker-text-extraction"
-    print(f"[INFO] Using Marker API: {url}")
+    start_time = time.time()
+    #base_url = config.LLM_ENDPOINT.split("/api")[0]
+    url = config.MARKER_URL
+    logging.info(f"Using Marker API: {url}")
 
     req_data = {
         "req_id": "123",
@@ -34,45 +36,50 @@ def extract_pdf(pdf_path: str, retries: int = 3, timeout: int = 300) -> str:
 
     last_error = None
     for attempt in range(1, retries + 1):
-        print(f"[INFO] Attempt {attempt}/{retries} → sending request...")
+        logging.info(f"Attempt {attempt}/{retries} → sending request...")
         try:
-            print(f"[DEBUG] Sending POST request with payload size: {len(req_data['doc_base64'])} chars")
+            logging.debug(f"Sending POST request with payload size: {len(req_data['doc_base64'])} chars")
             response = requests.post(url, json=req_data, timeout=timeout)
-            print(f"[DEBUG] Response received: status {response.status_code}")
+            logging.debug(f"Response received: status {response.status_code}")
             response.raise_for_status()
 
             resp_json = response.json()
 
-# Extract only the 'data' key
+            # Extract only the 'data' key
             md_text = resp_json.get("data", "")
 
             # Save to markdown if successful
-            filename = os.path.basename(pdf_path).replace(".pdf", ".md")
-            output_path = os.path.join(config.OUTPUT_DIR, filename)
-            os.makedirs(config.OUTPUT_DIR, exist_ok=True)
+            output_path = pdf_path.replace(".pdf", ".md")
 
-            print(f"[DEBUG] Writing response text to {output_path}")
+            logging.debug(f"Writing response text to {output_path}")
             with open(output_path, "w", encoding="utf-8") as f:
                 f.write(md_text)
 
-            print(f"[INFO] Saved extracted markdown to {output_path}")
+            logging.info(f"Saved extracted markdown to {output_path}")
+            end_time = time.time()
+            logging.info(f"Extraction completed in {end_time - start_time:.2f} seconds.")
             return output_path
 
         except requests.exceptions.Timeout:
-            print(f"[ERROR] Attempt {attempt} timed out after {timeout} seconds.")
+            logging.error(f"Attempt {attempt} timed out after {timeout} seconds.")
             last_error = "Timeout"
         except requests.exceptions.RequestException as e:
             last_error = e
-            print(f"[WARN] Attempt {attempt} failed: {e}")
+            logging.warning(f"Attempt {attempt} failed: {e}")
 
         if attempt < retries:
             wait = 5 * attempt  # exponential backoff: 5s, 10s, ...
-            print(f"[INFO] Retrying in {wait}s...")
+            logging.info(f"Retrying in {wait}s...")
             time.sleep(wait)
 
-    raise RuntimeError(f"[FATAL] All {retries} attempts failed. Last error: {last_error}")
+    end_time = time.time()
+    logging.error(f"All attempts failed after {end_time - start_time:.2f} seconds.")
+    
+    logging.critical(f"All {retries} attempts failed. Last error: {last_error}")
+    raise RuntimeError(f"All {retries} attempts failed. Last error: {last_error}")
 
 if __name__ == "__main__":
+    logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
     pdf_file = os.path.join(config.PDF_DIR, "Gamuda.pdf")
-    print(f"[INFO] Starting PDF extraction for: {pdf_file}")
+    logging.info(f"Starting PDF extraction for: {pdf_file}")
     extract_pdf(pdf_file, retries=3, timeout=300)

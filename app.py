@@ -175,7 +175,7 @@ async def generate_credit_memo(request: PayloadRequest):
                     if file_name.lower().endswith(".pdf"):
                         print(os.path.join(pdf_file_path,file_name))
                         md_file.append(extractor.extract_pdf(os.path.join(pdf_file_path,file_name)))
-                        # md_file.append("files/Gamuda.md")
+                        #md_file.append("/home/dhaval/Desktop/CreditApp/credit-memo/outputs/Gamuda.md")
                         
                 yield {
                     "event": "message",

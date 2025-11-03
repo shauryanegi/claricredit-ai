@@ -9,6 +9,7 @@ import numpy as np
 import httpx
 import chromadb
 from resources.config import config
+import tiktoken
 
 # -------------------------------
 # Sync embedding function
@@ -16,7 +17,8 @@ from resources.config import config
 def get_embedding(text: str) -> List[float]:
     """Get embedding for a single text using Ollama"""
     url = f"{config.EMBEDDING_BASE_URL}/api/embeddings"
-    payload = {"model": config.EMBEDDING_MODEL, "prompt": text}
+    payload = {"model": config.EMBEDDING_MODEL, "prompt": text, "options": {
+                "num_ctx": 8192}}
     try:
         # Using httpx for consistency, but sync
         with httpx.Client(timeout=60) as client:
@@ -24,7 +26,7 @@ def get_embedding(text: str) -> List[float]:
             response.raise_for_status()
             return response.json()["embedding"]
     except Exception as e:
-        logging.error(f"Error getting embedding: {e}")
+        logging.error(f"Error getting embedding: {e}, text: {text}")
         return [0.0] * 768  # fallback
 
 # -------------------------------
@@ -66,6 +68,21 @@ class MarkdownChunker:
         )
         self.chunks: List[Dict[str, Any]] = []
  
+    def count_tokens(self, text: str) -> int:
+        enc = tiktoken.get_encoding(config.DEFAULT_ENCODING)
+        return len(enc.encode(text))
+    def split_text_by_tokens(self, text: str, max_tokens: int) -> list[str]:
+        """Split long text into smaller text chunks without losing words."""
+        enc = tiktoken.get_encoding(config.DEFAULT_ENCODING)
+        tokens = enc.encode(text)
+        if len(tokens) <= max_tokens:
+            return [text]
+
+        sub_texts = []
+        for i in range(0, len(tokens), max_tokens):
+            sub_text = enc.decode(tokens[i:i + max_tokens])
+            sub_texts.append(sub_text.strip())
+        return sub_texts
     def extract_chunks_from_markdown(self, md_content: str) -> List[Dict[str, Any]]:
         chunks = []
         page_pattern = r"\{(\d+)\}-+"
@@ -83,23 +100,29 @@ class MarkdownChunker:
             text_content = re.sub(table_pattern, '', page_content, flags=re.MULTILINE)
             text_content = re.sub(r'\n\s*\n', '\n\n', text_content).strip()
             if text_content and len(text_content.strip()) > 50:
-                chunks.append({
-                    'chunk_id': len(chunks),
-                    'page': (page_idx + 1) // 2,
-                    'type': 'text',
-                    'content': text_content,
-                    'length': len(text_content)
-                })
-            for table_idx, table in enumerate(tables):
-                if len(table.strip()) > 20:
+                text_chunks = self.split_text_by_tokens(text_content, config.MAX_TOKENS)
+                for sub_text in text_chunks:
                     chunks.append({
                         'chunk_id': len(chunks),
                         'page': (page_idx + 1) // 2,
-                        'type': 'table',
-                        'table_index': table_idx + 1,
-                        'content': table,
-                        'length': len(table)
+                        'type': 'text',
+                        'content': sub_text,
+                        #'tokens': count_tokens(sub_text),
+                        'length': len(sub_text)
                     })
+            for table_idx, table in enumerate(tables):
+                if len(table.strip()) > 20:
+                    table_chunks = self.split_text_by_tokens(table, config.MAX_TOKENS)
+                    for sub_table in table_chunks:
+                        chunks.append({
+                            'chunk_id': len(chunks),
+                            'page': (page_idx + 1) // 2,
+                            'type': 'table',
+                            'table_index': table_idx + 1,
+                            'content': sub_table,
+                            #'tokens': count_tokens(sub_table),
+                            'length': len(sub_table)
+                        })
         return chunks
  
     def clean_marker_md(self, raw_text: str, remove_images: bool = False) -> str:
@@ -139,9 +162,14 @@ class MarkdownChunker:
         chunks = self.extract_chunks_from_markdown(md_content)
         logging.info(f"Extracted {len(chunks)} chunks")
  
-        # Compute embeddings concurrently
-        embeddings = await asyncio.gather(*(get_embedding_async(c['content']) for c in chunks))
-        embeddings = np.array(embeddings)
+        all_embeddings = []
+        for i in range(0, len(chunks), config.BATCH_SIZE):
+            batch = chunks[i:i + config.BATCH_SIZE]
+            batch_embeddings = await asyncio.gather(*(get_embedding_async(c['content']) for c in batch))
+            all_embeddings.extend(batch_embeddings)
+
+        embeddings= np.array(all_embeddings)
+        #embeddings = np.array(embeddings)
  
         self.save_embeddings(embeddings, chunks, md_file_path)
         self.store_in_chromadb(chunks, embeddings)

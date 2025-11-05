@@ -25,6 +25,7 @@ outputs/
 chroma_db/
 chroma_db_test_cosine2/
 output_test/
+cache/
 
 # Config (local/server only, don’t push to Git)
 resources/config/config.py
@@ -36,3 +37,5 @@ resources/config/config.py
 # Docker
 *.pid
 *.sock
+
+run.sh

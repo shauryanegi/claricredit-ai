@@ -10,6 +10,10 @@
 
 ---
 
+![ClariCredit Dashboard Preview](./docs/mockup.png)
+
+---
+
 ## 🌟 Real-World Impact
 *   **85% Reduction** in Credit Memo generation cycle (3 weeks → 3 days).
 *   **Hallucination Rate dropped to <4%** via HITL (Human-in-the-Loop) feedback loops.
@@ -25,17 +29,17 @@ ClariCredit AI uses a multi-layered architecture designed for precision and prod
 ### 1. The Reasoning Brain (ReAct Agent)
 Powered by **Llama-3.1-8B** (fine-tuned) or **GPT-4o**, the agent uses a **Reasoning + Acting (ReAct)** loop. It doesn't just retrieve; it decides *how* to retrieve, whether to search the web for industry benchmarks, or query internal financial databases.
 
-### 2. Hybrid Retrieval Engine
-Combines the best of two worlds:
-*   **Dense Retrieval**: Deep semantic understanding via **BGE-Base-v1.5** embeddings stored in **Chroma/Milvus**.
-*   **Sparse Retrieval**: Exact keyword matching via **BM25** to catch specific financial entities and amounts.
-*   **RRF Fusion**: Results are merged using Reciprocal Rank Fusion for optimal coverage.
+### 2. Hybrid Retrieval Engine (Dense + Sparse)
+Combines the best of two worlds to handle both semantic concepts and exact figures:
+*   **Dense Retrieval**: Deep semantic understanding via **BGE-Base-v1.5** embeddings.
+*   **Sparse Retrieval**: Exact keyword matching via **BM25** to catch specific financial amounts and entity names.
+*   **RRF Fusion**: Results are merged using Reciprocal Rank Fusion, ensuring that "hidden" relevant documents rank higher.
 
-### 3. Precision Re-ranking
-Top-K candidates are passed through a **Cross-Encoder Re-ranker**. This stage eliminates noise and ensures the LLM receives only the most contextually relevant chunks, significantly reducing hallucinations.
+### 3. Precision Re-ranking (Cross-Encoder)
+Top-K candidates (usually 100) are passed through a **Cross-Encoder Re-ranker**. This stage eliminates noise by analyzing the query and document *together*, ensuring the LLM receives only the most contextually relevant chunks.
 
 ### 4. MCP Integration (Model Context Protocol)
-Standardizes the interface between the Agent and external tools (Salesforce, Bloomberg, Internal DBs), decoupling orchestration logic from data silos and reducing boilerplate by 60%.
+Standardizes the interface between the Agent and external tools (Salesforce, Bloomberg, Internal DBs). This decouples orchestration logic from data silos, allowing for plug-and-play tool integration and a 60% reduction in custom integration boilerplate.
 
 ---
 
@@ -65,66 +69,59 @@ graph TD
 
 ---
 
+## 🔬 Engineering Deep-Dive
+
+### ⚡ Performance Optimization
+*   **PagedAttention**: By implementing vLLM, we eliminate memory fragmentation in the KV cache, allowing for high-throughput concurrent generation without Out-Of-Memory (OOM) errors.
+*   **Dynamic Batching**: Requests are batched on-the-fly to maximize GPU utilization (TFLOPS) while maintaining sub-second Time-To-First-Token (TTFT).
+*   **Asynchronous Orchestration**: The ingestion pipeline (Kafka → Spark) and retrieval pipeline are fully asynchronous, ensuring the UI remains responsive even during heavy processing.
+
+### 🛡️ Trust & Alignment
+*   **Human-in-the-Loop (HITL)**: Every corrected memo becomes a "Golden Example" for the next iteration, creating a self-improving data flywheel.
+*   **Confidence Routing**: Low-confidence retrievals are automatically flagged for manual review before generation.
+
+---
+
 ## 🛠️ Tech Stack
-*   **Core**: Python 3.10+, FastAPI
+*   **Core**: Python 3.10+, FastAPI, Pydantic
 *   **LLM Orchestration**: ReAct Framework, LangGraph/LangChain
-*   **Inference**: vLLM (supporting PagedAttention & Dynamic Batching)
-*   **Vector DB**: ChromaDB (Default), Milvus (for scale)
+*   **Inference**: vLLM, NVIDIA Triton (Ready)
+*   **Vector DB**: ChromaDB, Milvus
 *   **Embeddings**: BGE-Base-v1.5 / Nomic-768
-*   **Tools**: MCP (Model Context Protocol), Tavily, Yahoo Finance
+*   **Tools**: Model Context Protocol (MCP), Tavily, Yahoo Finance
 
 ---
 
 ## 📋 Getting Started
 
 ### Prerequisites
-- Python 3.10 or 3.11
-- CUDA-compatible GPU (Optional, for local vLLM acceleration)
+- Python 3.10+
+- CUDA-compatible GPU (Optional, for vLLM acceleration)
 
 ### Installation
 ```bash
-# Clone the repository
-git clone https://github.com/yourusername/claricredit-ai.git
+git clone https://github.com/shauryanegi/claricredit-ai.git
 cd claricredit-ai
-
-# Set up virtual environment
 python -m venv venv
-source venv/activate
-
-# Install core dependencies
+source venv/bin/activate
 pip install -r requirements.txt
 ```
 
-### Configuration
-Create a `.env` file in the root directory:
-```env
-OPENAI_API_KEY=your_key_here
-TAVILY_API_KEY=your_key_here
-DATABASE_URL=your_db_url
-VECTOR_DB_PATH=./chroma_db
-```
+---
 
-### Running the API
-```bash
-uvicorn app:app --host 0.0.0.0 --port 9999 --reload
-```
+## 🗺️ Roadmap
+- [ ] **Multi-Modal Support**: Analyzing charts and tables via Vision-LLMs (Llava/GPT-4o-V).
+- [ ] **Bloomberg Terminal Integration**: Real-time financial data feeds via MCP.
+- [ ] **DPO Alignment**: Fine-tuning the core model using Direct Preference Optimization on expert-corrected memos.
+- [ ] **Distributed Deployment**: Kubernetes (K8s) manifests for scalable GPU serving.
 
 ---
 
-## 📊 Evaluation & Metrics
-We use the **RAGAS** framework to measure performance across four critical dimensions:
-*   **Faithfulness**: Ensuring answers are grounded ONLY in provided documents.
-*   **Answer Relevancy**: Does the memo actually address the target risk profile?
-*   **Context Precision**: How much "signal" is in our Top-K retrieved chunks?
-*   **BERTScore / ROUGE-L**: Comparing generated memos against "Golden Summaries" from senior analysts.
-
----
-
-## 🤝 Contributing
-Contributions are welcome! Please read the [CONTRIBUTING.md](CONTRIBUTING.md) for details on our code of conduct and the process for submitting pull requests.
-
-## 📄 License
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+## 📊 Evaluation
+We use the **RAGAS** framework for automated evaluation:
+*   **Faithfulness**: Answer grounding in retrieved context.
+*   **Answer Relevancy**: Query-response alignment.
+*   **Context Precision**: Signal-to-noise ratio in retrieval.
 
 ---
 **Built with ❤️ for the future of Financial Intelligence.**

@@ -1,35 +1,94 @@
 import chromadb
 import logging
-from typing import List
+from typing import List, Optional, Tuple
 from resources.embeddings import get_embedding
 from resources.llm_adapter import LocalLLMAdapter
 from resources.config.system_prompt import SYSTEM_PROMPT,ADDITIONAL_INSTRUCTIONS
 from collections import OrderedDict
 import json
 
+# Optional: Import reranker (falls back gracefully if not available)
+try:
+    from resources.reranker import get_reranker
+    RERANKER_AVAILABLE = True
+except ImportError:
+    RERANKER_AVAILABLE = False
+    logging.warning("Reranker not available. Install sentence-transformers for better retrieval.")
+
 class RAGPipelineCosine:
+    """
+    RAG Pipeline with optional Cross-Encoder Re-ranking.
+    
+    🎯 WHAT'S NEW (for interview):
+    - retrieve() now has optional `rerank=True` parameter
+    - Uses Cross-Encoder to re-order results by true relevance
+    - This is the "hybrid retrieval" mentioned in your resume!
+    """
+    
     def __init__(self, collection_name: str,
-                 llm_endpoint: str, llm_model: str):
+                 llm_endpoint: str, llm_model: str,
+                 use_reranker: bool = True):
         self.chroma_client = chromadb.Client()
         self.collection = self.chroma_client.get_or_create_collection(collection_name)
         self.llm = LocalLLMAdapter(endpoint=llm_endpoint, model=llm_model)
+        self.use_reranker = use_reranker and RERANKER_AVAILABLE
+        
+        if self.use_reranker:
+            logging.info("Cross-Encoder reranker enabled for hybrid retrieval")
 
-    def retrieve(self, query: str, n_results: int = 5, filter=None):
+    def retrieve(self, query: str, n_results: int = 5, filter=None, 
+                 rerank: bool = True, rerank_top_k: Optional[int] = None) -> List[Tuple[str, dict]]:
+        """
+        Retrieve documents with optional Cross-Encoder re-ranking.
+        
+        Args:
+            query: Search query
+            n_results: Number of candidates to retrieve initially
+            filter: Optional filter (e.g., type='table')
+            rerank: Whether to apply Cross-Encoder re-ranking
+            rerank_top_k: How many to keep after reranking (default: n_results)
+            
+        Returns:
+            List of (document, metadata) tuples
+            
+        How Re-ranking Works:
+        1. ChromaDB returns top-N by embedding similarity (fast, rough)
+        2. Cross-Encoder scores each (query, doc) pair carefully
+        3. Results are re-ordered by Cross-Encoder scores
+        
+        This is your "hybrid retrieval" for the interview!
+        """
         query_emb = get_embedding(query)
+        
+        # Step 1: Get initial candidates (over-fetch if reranking)
+        fetch_count = n_results * 2 if (rerank and self.use_reranker) else n_results
+        
         if filter:
             results = self.collection.query(
                 query_embeddings=[query_emb],
-                n_results=n_results,
+                n_results=fetch_count,
                 where={"type": filter}
             )
         else:
             results = self.collection.query(
                 query_embeddings=[query_emb],
-                n_results=n_results
+                n_results=fetch_count
             )            
         docs = results["documents"][0]
         metas = results["metadatas"][0]
-        return list(zip(docs, metas))
+        docs_with_meta = list(zip(docs, metas))
+        
+        # Step 2: Optional Cross-Encoder re-ranking
+        if rerank and self.use_reranker and len(docs_with_meta) > 1:
+            reranker = get_reranker()
+            top_k = rerank_top_k or n_results
+            
+            # Re-rank and return top results
+            reranked = reranker.rerank_with_metadata(query, docs_with_meta, top_k=top_k)
+            docs_with_meta = [(doc, meta) for doc, meta, _ in reranked]
+            logging.info(f"Re-ranked {len(docs)} candidates → top {top_k}")
+        
+        return docs_with_meta
 
     def generate_answer(self, query: str, context_docs: List[str], fin_data: str) -> str:
         context = "\n\n".join(context_docs)

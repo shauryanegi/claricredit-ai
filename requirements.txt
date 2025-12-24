@@ -6,3 +6,13 @@ Requests==2.32.5
 httpx
 sse-starlette
 tiktoken==0.12.0
+
+# Cross-Encoder Re-ranking (for hybrid retrieval)
+sentence-transformers>=2.2.0
+
+# Web Search Tools
+duckduckgo-search>=4.0.0
+tavily-python>=0.3.0  # Optional: better for AI apps, needs API key
+
+# MCP Support (when using official MCP)
+# mcp>=0.1.0  # Uncomment when mcp-python is stable
